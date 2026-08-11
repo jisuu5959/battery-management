@@ -1411,7 +1411,7 @@ function chipStyleFor(type) {
   return String(type).startsWith("12V") ? TYPE_STYLE["12V"].chip : TYPE_STYLE["2V"].chip;
 }
 
-function CombinedStockTable({ values, onChange, targets }) {
+function CombinedStockTable({ values, onChange, targets, isAdmin }) {
   const usageByType = useMemo(() => {
     const map = {};
     STOCK_ROWS.forEach((type) => { map[type] = (targets || []).filter((t) => t.종류 === type).length; });
@@ -1441,12 +1441,16 @@ function CombinedStockTable({ values, onChange, targets }) {
               <td className="whitespace-nowrap border border-slate-200 bg-slate-50/70 px-3 py-2 text-left font-medium text-slate-600">{round}</td>
               {STOCK_ROWS.map((type) => (
                 <td key={type} className="border border-slate-200 p-0">
-                  <input
-                    value={values[`${round}_${type}`] ?? ""}
-                    onChange={(e) => onChange(round, type, e.target.value)}
-                    className="w-full bg-transparent px-2 py-2 text-center outline-none focus:bg-slate-50"
-                    placeholder="-"
-                  />
+                  {isAdmin ? (
+                    <input
+                      value={values[`${round}_${type}`] ?? ""}
+                      onChange={(e) => onChange(round, type, e.target.value)}
+                      className="w-full bg-transparent px-2 py-2 text-center outline-none focus:bg-slate-50"
+                      placeholder="-"
+                    />
+                  ) : (
+                    <span className="block px-2 py-2 text-slate-700">{values[`${round}_${type}`] || "-"}</span>
+                  )}
                 </td>
               ))}
             </tr>
@@ -1717,22 +1721,59 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
 function BatteryStockPage({ isAdmin }) {
   const [stock, setStock] = useState({});
   const [targets, setTargets] = useState([]);
+  const [stockSaveState, setStockSaveState] = useState("idle"); // idle | saving | saved
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await kv.get("battery-stock-quantities");
+        if (res?.value) setStock(JSON.parse(res.value) || {});
+      } catch (e) { console.error("[kv load failed] battery-stock-quantities", e); }
+    })();
+  }, []);
 
   const updateStock = (round, label, val) => setStock((p) => ({ ...p, [`${round}_${label}`]: val }));
+
+  const handleStockSave = async () => {
+    if (!isAdmin) return;
+    setStockSaveState("saving");
+    try {
+      await kv.set("battery-stock-quantities", JSON.stringify(stock));
+      setStockSaveState("saved");
+    } catch (e) {
+      setStockSaveState("idle");
+    } finally {
+      setTimeout(() => setStockSaveState("idle"), 1800);
+    }
+  };
 
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
           <div className="rounded-md border border-slate-300 px-6 py-1.5 text-sm font-semibold text-slate-700">축전지 재고</div>
-          <button onClick={() => exportStockToExcel(stock, targets)}
-            className="flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100">
-            <FileSpreadsheet size={14} /> 엑셀 다운로드
-          </button>
+          <div className="flex items-center gap-2">
+            {isAdmin ? (
+              <button onClick={handleStockSave}
+                className={`flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium shadow-sm transition-colors ${
+                  stockSaveState === "saved" ? "border-emerald-200 bg-emerald-50 text-emerald-600" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}>
+                {stockSaveState === "saved" ? <><Check size={13} /> 저장됨</> : <><Save size={13} /> {stockSaveState === "saving" ? "저장 중..." : "저장"}</>}
+              </button>
+            ) : (
+              <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                <Lock size={11} /> 재고 수량 수정·저장은 관리자 모드에서만 가능합니다
+              </span>
+            )}
+            <button onClick={() => exportStockToExcel(stock, targets)}
+              className="flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100">
+              <FileSpreadsheet size={14} /> 엑셀 다운로드
+            </button>
+          </div>
         </div>
 
         <div className="space-y-4">
-          <CombinedStockTable values={stock} onChange={updateStock} targets={targets} />
+          <CombinedStockTable values={stock} onChange={updateStock} targets={targets} isAdmin={isAdmin} />
           <TargetTable records={targets} setRecords={setTargets}
             storageKey="battery-stock-targets" isAdmin={isAdmin} />
         </div>
