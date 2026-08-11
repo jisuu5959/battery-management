@@ -591,7 +591,7 @@ function StatusBadge({ status }) {
     미측정: "bg-slate-100 text-slate-500",
   };
   return (
-    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${map[status] || "bg-slate-100 text-slate-500"}`}>
+    <span className={`inline-block whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${map[status] || "bg-slate-100 text-slate-500"}`}>
       {status || "미확인"}
     </span>
   );
@@ -898,6 +898,17 @@ function stationModels(station) {
   return models.length ? models.join(", ") : "-";
 }
 
+/** 정류기 모델명을 콤마로 이어붙이지 않고 하나씩 줄바꿈해서 보여준다. */
+function StationModelList({ station }) {
+  const models = [...new Set((station.rectifiers || []).map((r) => r.정류기모델).filter(Boolean))];
+  if (!models.length) return <span className="text-slate-300">-</span>;
+  return (
+    <div className="flex flex-col gap-0.5">
+      {models.map((m, i) => <span key={i} className="whitespace-nowrap">{m}</span>)}
+    </div>
+  );
+}
+
 /** 국소의 정류기들에서 조치여부(BW열: 대개체필요/불용철거필요 등)를 모아 콤마로 이어붙인다. */
 function stationAction(station) {
   const actions = [...new Set((station.rectifiers || []).map((r) => r.대개체여부).filter(Boolean))];
@@ -907,7 +918,7 @@ function stationAction(station) {
 function ActionBadge({ text }) {
   if (!text) return <span className="text-slate-300">-</span>;
   const tone = text.includes("불용철거") ? "bg-violet-50 text-violet-600" : text.includes("대개체") ? "bg-amber-50 text-amber-600" : "bg-slate-100 text-slate-500";
-  return <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${tone}`}>{text}</span>;
+  return <span className={`inline-block whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${tone}`}>{text}</span>;
 }
 
 /** 기지국 현황 표를 엑셀(xlsx)로 내려받는다. */
@@ -966,12 +977,12 @@ function StationTable({ rows, compact, presetFilter, onClearPreset, excludedMode
 
   useEffect(() => { setPage(1); }, [presetFilter]);
 
-  const teams = useMemo(() => ["전체", ...new Set(rows.map((r) => r["SKT팀"]).filter(Boolean))], [rows]);
+  const teams = useMemo(() => ["전체", ...new Set(rows.map((r) => r["팀"]).filter(Boolean))], [rows]);
 
   const filtered = useMemo(() => {
     return rows.filter((r) => {
       const okQ = !q || norm(r["국소명"]).includes(norm(q)) || norm(r["주소"]).includes(norm(q));
-      const okTeam = teamFilter === "전체" || r["SKT팀"] === teamFilter;
+      const okTeam = teamFilter === "전체" || r["팀"] === teamFilter;
       const okStatus = statusFilter === "전체" || stationStatus(r, excludedModels) === statusFilter;
       const okPreset = stationMatchesPreset(r, presetFilter, excludedModels);
       return okQ && okTeam && okStatus && okPreset;
@@ -1021,7 +1032,6 @@ function StationTable({ rows, compact, presetFilter, onClearPreset, excludedMode
             <tr>
               <th className="px-2 py-2 font-medium">국소명</th>
               <th className="px-2 py-2 font-medium">주소</th>
-              <th className="px-2 py-2 font-medium">SKT팀</th>
               <th className="px-2 py-2 font-medium">현장운용팀</th>
               <th className="px-2 py-2 font-medium">정류기 모델명</th>
               <th className="px-2 py-2 font-medium">상태</th>
@@ -1030,15 +1040,14 @@ function StationTable({ rows, compact, presetFilter, onClearPreset, excludedMode
           </thead>
           <tbody>
             {shown.length === 0 && (
-              <tr><td colSpan={7} className="px-2 py-6 text-center text-slate-400">표시할 데이터가 없습니다.</td></tr>
+              <tr><td colSpan={6} className="px-2 py-6 text-center text-slate-400">표시할 데이터가 없습니다.</td></tr>
             )}
             {shown.map((r, i) => (
               <tr key={i} className="border-t border-slate-100 hover:bg-slate-50">
                 <td className="px-2 py-2 font-medium text-slate-700">{r["국소명"] || "-"}</td>
                 <td className="px-2 py-2 text-slate-500">{r["주소"] || "-"}</td>
-                <td className="px-2 py-2 text-slate-500">{r["SKT팀"] || "-"}</td>
                 <td className="px-2 py-2 text-slate-500">{r["팀"] || "-"}</td>
-                <td className="px-2 py-2 text-slate-500">{stationModels(r)}</td>
+                <td className="px-2 py-2 text-slate-500"><StationModelList station={r} /></td>
                 <td className="px-2 py-2"><StatusBadge status={stationStatus(r, excludedModels)} /></td>
                 <td className="px-2 py-2"><ActionBadge text={stationAction(r)} /></td>
               </tr>
@@ -1744,7 +1753,7 @@ const BACKUP_TONE_CLASSES = {
   slate: { border: "border-slate-200", bg: "bg-slate-50", chip: "bg-slate-100 text-slate-500", big: "text-slate-400", badge: "bg-slate-100 text-slate-500" },
 };
 
-function StationBackupCard({ station, results, repH, missingCount }) {
+function StationBackupCard({ station, results, repH, missingCount, large }) {
   const [openKey, setOpenKey] = useState(null);
   const tier = backupTier(repH);
   const tone = BACKUP_TONE_CLASSES[tier.tone];
@@ -1761,20 +1770,21 @@ function StationBackupCard({ station, results, repH, missingCount }) {
   }, [results]);
 
   return (
-    <div className={`rounded-xl border ${tone.border} ${tone.bg} p-3.5`}>
+    <div className={`rounded-xl border ${tone.border} ${tone.bg} ${large ? "p-5" : "p-3.5"}`}>
       <div className="mb-2 flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-slate-800">{station["국소명"] || "-"}</p>
-          <p className="truncate text-[11px] text-slate-400">{station["주소"] || "-"} · {station["SKT팀"] || "-"}</p>
+          <p className={`truncate font-semibold text-slate-800 ${large ? "text-lg" : "text-sm"}`}>{station["국소명"] || "-"}</p>
+          <p className={`truncate text-slate-400 ${large ? "text-sm" : "text-[11px]"}`}>{station["주소"] || "-"} · {station["팀"] || "-"}</p>
         </div>
-        <span className={`inline-block shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${tone.badge}`}>{tier.label}</span>
+        <span className={`inline-block shrink-0 rounded-full font-medium ${tone.badge} ${large ? "px-3 py-1 text-xs" : "px-2 py-0.5 text-[10px]"}`}>{tier.label}</span>
       </div>
 
-      <div className="mb-3 flex items-end gap-1.5 rounded-lg bg-white/70 px-3 py-2">
-        <Clock size={16} className={tone.big} />
-        <p className={`text-2xl font-extrabold leading-none ${tone.big}`}>{repH != null ? repH : "-"}</p>
-        <p className="pb-0.5 text-xs font-medium text-slate-400">{repH != null ? "시간 예상 (뱅크 중 최소값 기준)" : "계산 불가"}</p>
+      <div className={`mb-3 flex items-end gap-1.5 rounded-lg bg-white/70 ${large ? "px-4 py-4" : "px-3 py-2"}`}>
+        <Clock size={large ? 24 : 16} className={tone.big} />
+        <p className={`font-extrabold leading-none ${tone.big} ${large ? "text-4xl" : "text-2xl"}`}>{repH != null ? repH : "-"}</p>
+        <p className={`pb-0.5 font-medium text-slate-400 ${large ? "text-sm" : "text-xs"}`}>{repH != null ? "시간 예상 (뱅크 중 최소값 기준)" : "계산 불가"}</p>
       </div>
+
 
       {groups.length > 0 && (
         <div className="space-y-2">
@@ -1872,9 +1882,9 @@ function BackupPage({ rows }) {
 
       {query.length >= 2 && computed.length > 0 && (
         <>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className={shown.length === 1 ? "grid grid-cols-1" : "grid grid-cols-1 gap-3 sm:grid-cols-2"}>
             {shown.map((c, i) => (
-              <StationBackupCard key={i} station={c.station} results={c.results} repH={c.repH} missingCount={c.missingCount} />
+              <StationBackupCard key={i} station={c.station} results={c.results} repH={c.repH} missingCount={c.missingCount} large={shown.length === 1} />
             ))}
           </div>
           {computed.length > SHOWN_LIMIT && (
