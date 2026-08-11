@@ -25,21 +25,23 @@ const supabase = createClient(
 );
 
 /** window.storage와 동일한 모양({key, value})으로 맞춘 Supabase 기반 key-value 저장소.
- *  Claude 아티팩트 밖(정식 배포)에서는 window.storage가 없으므로 이걸 대신 쓴다. */
+ *  Claude 아티팩트 밖(정식 배포)에서는 window.storage가 없으므로 이걸 대신 쓴다.
+ *  에러는 콘솔에 그대로 찍고 위로 던진다 — 조용히 삼키면 "저장 안 됐는데 성공한 것처럼 보이는" 문제가 생긴다. */
 const kv = {
   async get(key) {
     const { data, error } = await supabase.from("app_kv").select("value").eq("key", key).maybeSingle();
-    if (error || !data) return null;
+    if (error) { console.error("[kv.get]", key, error); throw error; }
+    if (!data) return null;
     return { key, value: data.value };
   },
   async set(key, value) {
     const { error } = await supabase.from("app_kv").upsert({ key, value, updated_at: new Date().toISOString() });
-    if (error) return null;
+    if (error) { console.error("[kv.set]", key, error); throw error; }
     return { key, value };
   },
   async delete(key) {
     const { error } = await supabase.from("app_kv").delete().eq("key", key);
-    if (error) return null;
+    if (error) { console.error("[kv.delete]", key, error); throw error; }
     return { key, deleted: true };
   },
 };
@@ -2356,14 +2358,14 @@ export default function App() {
     setExcludedModels((prev) => {
       if (prev.includes(trimmed)) return prev;
       const next = [...prev, trimmed];
-      kv.set("excluded-rectifier-models", JSON.stringify(next)).catch(() => {});
+      kv.set("excluded-rectifier-models", JSON.stringify(next)).catch((err) => console.error("[kv persist failed]", err));
       return next;
     });
   };
   const removeExcludedModel = (name) => {
     setExcludedModels((prev) => {
       const next = prev.filter((m) => m !== name);
-      kv.set("excluded-rectifier-models", JSON.stringify(next)).catch(() => {});
+      kv.set("excluded-rectifier-models", JSON.stringify(next)).catch((err) => console.error("[kv persist failed]", err));
       return next;
     });
   };
@@ -2394,19 +2396,19 @@ export default function App() {
       try {
         const res = await kv.get("battery-base-files");
         if (res?.value) setBaseFiles(JSON.parse(res.value) || []);
-      } catch (e) { /* 저장된 데이터 없음 */ }
+      } catch (e) { console.error("[kv load failed] battery-base-files", e); }
       try {
         const res3 = await kv.get("acta-history-log");
         if (res3?.value) setActaHistory(JSON.parse(res3.value) || {});
-      } catch (e) { /* 저장된 이력 없음 */ }
+      } catch (e) { console.error("[kv load failed] acta-history-log", e); }
       try {
         const res4 = await kv.get("admin-pin");
         if (res4?.value) setAdminPin(res4.value);
-      } catch (e) { /* 기본 PIN 사용 */ }
+      } catch (e) { console.error("[kv load failed] admin-pin", e); }
       try {
         const res5 = await kv.get("excluded-rectifier-models");
         if (res5?.value) setExcludedModels(JSON.parse(res5.value) || []);
-      } catch (e) { /* 제외 목록 없음 */ }
+      } catch (e) { console.error("[kv load failed] excluded-rectifier-models", e); }
     })();
   }, []);
 
@@ -2461,17 +2463,22 @@ export default function App() {
           rawPreview,
         });
       }
+      let toPersist;
       setBaseFiles((prev) => {
         const next = [...prev, ...newEntries];
-        const toPersist = next.map(({ rawPreview, ...rest }) => rest); // 미리보기는 저장 용량 아끼려고 세션에만 둔다
-        kv.set("battery-base-files", JSON.stringify(toPersist)).catch(() => {});
+        toPersist = next.map(({ rawPreview, ...rest }) => rest); // 미리보기는 저장 용량 아끼려고 세션에만 둔다
         return next;
       });
       const totalStations = newEntries.reduce((s, f) => s + f.stations.length, 0);
-      if (totalWithCode === 0 && totalRaw > 0) {
-        setToast(`⚠ ${totalRaw}행을 읽었지만 통합시설코드/국소명이 있는 행이 0건입니다. E열·F열 위치를 다시 확인해주세요.`);
-      } else {
-        setToast(`엑셀 업로드 완료 · 파일 ${newEntries.length}개, 국소 ${totalStations}건 추가됨 (읽은 행 ${totalRaw}건 중 ${totalWithCode}건 매칭)`);
+      try {
+        await kv.set("battery-base-files", JSON.stringify(toPersist));
+        if (totalWithCode === 0 && totalRaw > 0) {
+          setToast(`⚠ ${totalRaw}행을 읽었지만 통합시설코드/국소명이 있는 행이 0건입니다. E열·F열 위치를 다시 확인해주세요.`);
+        } else {
+          setToast(`엑셀 업로드 완료 · 파일 ${newEntries.length}개, 국소 ${totalStations}건 추가됨 (읽은 행 ${totalRaw}건 중 ${totalWithCode}건 매칭)`);
+        }
+      } catch (persistErr) {
+        setToast(`⚠ 화면에는 반영됐지만 서버 저장에 실패했습니다 — 새로고침하면 사라져요. (${persistErr?.message || persistErr})`);
       }
     } catch (err) {
       setToast(`엑셀 파일을 읽는 중 오류가 발생했습니다: ${err?.message || err}`);
@@ -2481,18 +2488,27 @@ export default function App() {
     }
   };
 
-  const removeBaseFile = (id) => {
+  const removeBaseFile = async (id) => {
+    let next;
     setBaseFiles((prev) => {
-      const next = prev.filter((f) => f.id !== id);
-      kv.set("battery-base-files", JSON.stringify(next)).catch(() => {});
+      next = prev.filter((f) => f.id !== id);
       return next;
     });
+    try {
+      await kv.set("battery-base-files", JSON.stringify(next));
+    } catch (err) {
+      setToast(`⚠ 삭제가 서버에 저장되지 않았습니다: ${err?.message || err}`);
+    }
   };
 
   const resetBase = async () => {
     setBaseFiles([]);
-    try { await kv.delete("battery-base-files"); } catch (e) {}
-    setToast("기본정보 데이터를 초기화했습니다.");
+    try {
+      await kv.delete("battery-base-files");
+      setToast("기본정보 데이터를 초기화했습니다.");
+    } catch (err) {
+      setToast(`⚠ 초기화가 서버에 반영되지 않았습니다: ${err?.message || err}`);
+    }
   };
 
   // 합쳐진 국소 데이터(rows)가 바뀔 때마다 정류기 등급 변동을 감지해 ACTA 이력에 자동으로 쌓는다.
@@ -2501,7 +2517,7 @@ export default function App() {
     setActaHistory((prev) => {
       const { history, changed } = buildActaHistory(rows, prev);
       if (changed) {
-        kv.set("acta-history-log", JSON.stringify(history)).catch(() => {});
+        kv.set("acta-history-log", JSON.stringify(history)).catch((err) => console.error("[kv persist failed]", err));
       }
       return changed ? history : prev;
     });
