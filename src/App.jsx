@@ -2472,12 +2472,12 @@ export default function App() {
           rawPreview,
         });
       }
-      let toPersist;
-      setBaseFiles((prev) => {
-        const next = [...prev, ...newEntries];
-        toPersist = next.map(({ rawPreview, ...rest }) => rest); // 미리보기는 저장 용량 아끼려고 세션에만 둔다
-        return next;
-      });
+      // setState의 함수형 업데이터는 React가 나중에(비동기로) 실행할 수도 있어서, 그 안에서 만든 값을
+      // 바로 다음 줄에서 쓰면 아직 비어있을 수 있다(→ 그대로 저장하면 DB에 value가 NULL로 들어감).
+      // 그래서 next/toPersist는 지금 갖고 있는 baseFiles로 미리 계산해서 쓴다.
+      const next = [...baseFiles, ...newEntries];
+      const toPersist = next.map(({ rawPreview, ...rest }) => rest); // 미리보기는 저장 용량 아끼려고 세션에만 둔다
+      setBaseFiles(next);
       const totalStations = newEntries.reduce((s, f) => s + f.stations.length, 0);
       try {
         await kv.set("battery-base-files", JSON.stringify(toPersist));
@@ -2498,11 +2498,8 @@ export default function App() {
   };
 
   const removeBaseFile = async (id) => {
-    let next;
-    setBaseFiles((prev) => {
-      next = prev.filter((f) => f.id !== id);
-      return next;
-    });
+    const next = baseFiles.filter((f) => f.id !== id);
+    setBaseFiles(next);
     try {
       await kv.set("battery-base-files", JSON.stringify(next));
     } catch (err) {
