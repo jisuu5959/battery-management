@@ -141,6 +141,23 @@ function countHeaderRows(aoaRaw, checks) {
   return Math.max(i, 1); // 최소 1행은 헤더로 간주
 }
 
+/** 헤더가 2줄 이상인 파일에서, 컬럼 라벨 텍스트 자체가 데이터 행에 또 섞여 들어온 경우를 걸러낸다.
+ *  예: 국소명 칸에 "국소명"/"공용대표시설명", 주소 칸에 "주소"가 그대로 들어있으면 실제 데이터가 아니라 헤더 잔재로 본다. */
+function isHeaderEchoRow(row) {
+  const echoChecks = [
+    { field: "국소명", labels: ["국소명", "공용대표시설명"] },
+    { field: "주소", labels: ["주소", "주소2"] },
+    { field: "팀", labels: ["팀", "현장운용팀"] },
+    { field: "정류기모델", labels: ["정류기모델", "정류기모델명", "모델명"] },
+  ];
+  let matches = 0;
+  for (const { field, labels } of echoChecks) {
+    const v = norm(row[field]);
+    if (v && labels.some((l) => v === norm(l))) matches += 1;
+  }
+  return matches >= 2; // 두 개 이상 열이 동시에 라벨 텍스트면 헤더 잔재 행으로 확정
+}
+
 /* ----------------------------------------------------------------------------------------
    기지국·축전지 기본정보 — 하나로 합쳐진 엑셀, 고정 열(컬럼) 매핑
    1행은 목차라서 무시.
@@ -257,7 +274,7 @@ function parseFixedColumnSheet(file) {
           const nums = [g5, g4, g3].filter((n) => !Number.isNaN(n));
           out["계"] = nums.length ? nums.reduce((s, n) => s + n, 0) : "";
           return out;
-        });
+        }).filter((out) => !isHeaderEchoRow(out)); // 헤더가 여러 줄이라 라벨 텍스트가 데이터 자리에 또 들어온 행 제외
         const withCode = flat.filter((r) => r.통합시설코드 || r.국소명).length;
         resolve({ rows: flat, total: nonEmptyRows.length, withCode, rawPreview });
       } catch (err) { reject(err); }
@@ -2364,6 +2381,11 @@ export default function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminPin, setAdminPin] = useState("0000");
 
+  // 관리자 모드가 꺼지면(로그아웃/시작 시 기본값) 관리자 화면에 남아있지 않도록 홈으로 이동시킨다.
+  useEffect(() => {
+    if (!isAdmin && page === "admin") setPage("home");
+  }, [isAdmin, page]);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [toast, setToast] = useState("");
 
@@ -2501,13 +2523,15 @@ export default function App() {
             <span className="hidden text-xs text-slate-400 lg:block">
               {baseFiles.length ? `국소 ${rows.length}건 · 파일 ${baseFiles.length}개` : "샘플 데이터 표시 중"}
             </span>
-            <button onClick={() => setPage("admin")}
-              title="관리자 메뉴에서 엑셀을 업로드하세요"
-              className={`flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium hover:bg-slate-50 ${
-                page === "admin" ? "border-blue-300 text-blue-600 bg-blue-50" : "border-slate-200 text-slate-500"
-              }`}>
-              <Settings size={14} /> 관리자
-            </button>
+            {isAdmin && (
+              <button onClick={() => setPage("admin")}
+                title="관리자 메뉴에서 엑셀을 업로드하세요"
+                className={`flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium hover:bg-slate-50 ${
+                  page === "admin" ? "border-blue-300 text-blue-600 bg-blue-50" : "border-slate-200 text-slate-500"
+                }`}>
+                <Settings size={14} /> 관리자
+              </button>
+            )}
             <button onClick={toggleAdmin}
               title={isAdmin ? "클릭하면 관리자 모드가 종료됩니다" : "PIN을 입력하면 관리자 모드로 전환됩니다"}
               className={`flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium ${
@@ -2519,7 +2543,7 @@ export default function App() {
         </div>
         <nav className="hidden border-t border-slate-100 md:block">
           <div className="mx-auto flex max-w-7xl gap-1 px-4">
-            {NAV.map(({ key, label, icon: Icon }) => (
+            {NAV.filter((n) => n.key !== "admin" || isAdmin).map(({ key, label, icon: Icon }) => (
               <button key={key} onClick={() => { setPage(key); setPresetFilter(null); }}
                 className={`flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
                   page === key ? "border-blue-600 text-blue-600" : "border-transparent text-slate-500 hover:text-slate-700"
@@ -2531,7 +2555,7 @@ export default function App() {
         </nav>
         {menuOpen && (
           <div className="border-t border-slate-100 bg-white md:hidden">
-            {NAV.map(({ key, label, icon: Icon }) => (
+            {NAV.filter((n) => n.key !== "admin" || isAdmin).map(({ key, label, icon: Icon }) => (
               <button key={key} onClick={() => { setPage(key); setPresetFilter(null); setMenuOpen(false); }}
                 className={`flex w-full items-center gap-2 px-4 py-3 text-sm ${page === key ? "bg-blue-50 text-blue-600" : "text-slate-600"}`}>
                 <Icon size={16} /> {label}
