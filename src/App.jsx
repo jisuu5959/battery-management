@@ -892,22 +892,32 @@ function stationStatus(station, excludedModels) {
   return "양호";
 }
 
-/** 국소의 정류기들에서 서로 다른 모델명(Z열)만 모아 콤마로 이어붙인다. */
+/** 국소의 정류기들에서 서로 다른 모델명(Z열)만 모아 콤마로 이어붙인다. (엑셀 내보내기용) */
 function stationModels(station) {
   const models = [...new Set((station.rectifiers || []).map((r) => r.정류기모델).filter(Boolean))];
   return models.length ? models.join(", ") : "-";
 }
 
-/** 정류기 모델명을 콤마로 이어붙이지 않고 하나씩 줄바꿈해서 보여준다. */
-function StationModelList({ station }) {
-  const models = [...new Set((station.rectifiers || []).map((r) => r.정류기모델).filter(Boolean))];
-  if (!models.length) return <span className="text-slate-300">-</span>;
-  return (
-    <div className="flex flex-col gap-0.5">
-      {models.map((m, i) => <span key={i} className="whitespace-nowrap">{m}</span>)}
-    </div>
-  );
+/** 국소 1개를 정류기 모델명(Z열)별로 쪼개서, 모델마다 별도의 행으로 만든다.
+ *  같은 국소에 sars-375, SDPS-48N-10A 두 모델이 있으면 이 국소는 2개 행이 된다.
+ *  각 행의 rectifiers는 그 모델에 해당하는 정류기만 담아서, 상태·조치여부도 모델 단위로 판정되게 한다. */
+function expandStationsByModel(stations) {
+  const expanded = [];
+  (stations || []).forEach((station) => {
+    const rects = station.rectifiers || [];
+    const models = [...new Set(rects.map((r) => r.정류기모델).filter(Boolean))];
+    if (!models.length) {
+      expanded.push({ ...station, rectifiers: rects, _model: null });
+      return;
+    }
+    models.forEach((model) => {
+      expanded.push({ ...station, rectifiers: rects.filter((r) => r.정류기모델 === model), _model: model });
+    });
+  });
+  return expanded;
 }
+
+
 
 /** 국소의 정류기들에서 조치여부(BW열: 대개체필요/불용철거필요 등)를 모아 콤마로 이어붙인다. */
 function stationAction(station) {
@@ -923,10 +933,10 @@ function ActionBadge({ text }) {
 
 /** 기지국 현황 표를 엑셀(xlsx)로 내려받는다. */
 function exportStationsToExcel(stations, label, excludedModels) {
-  const headers = ["국소명", "주소", "SKT팀", "현장운용팀", "정류기모델", "상태", "조치여부"];
+  const headers = ["국소명", "주소", "현장운용팀", "정류기모델", "상태", "조치여부"];
   const aoa = [headers, ...stations.map((s) => [
-    s["국소명"] || "", s["주소"] || "", s["SKT팀"] || "", s["팀"] || "",
-    stationModels(s), stationStatus(s, excludedModels), stationAction(s),
+    s["국소명"] || "", s["주소"] || "", s["팀"] || "",
+    s._model || stationModels(s), stationStatus(s, excludedModels), stationAction(s),
   ])];
   const ws = XLSX.utils.aoa_to_sheet(aoa);
   const wb = XLSX.utils.book_new();
@@ -979,15 +989,18 @@ function StationTable({ rows, compact, presetFilter, onClearPreset, excludedMode
 
   const teams = useMemo(() => ["전체", ...new Set(rows.map((r) => r["팀"]).filter(Boolean))], [rows]);
 
+  // 국소 1개를 정류기 모델명별로 쪼갠 뒤 필터링한다 — 그래야 상태·조치여부도 모델 단위로 정확히 표시된다.
+  const expandedRows = useMemo(() => expandStationsByModel(rows), [rows]);
+
   const filtered = useMemo(() => {
-    return rows.filter((r) => {
+    return expandedRows.filter((r) => {
       const okQ = !q || norm(r["국소명"]).includes(norm(q)) || norm(r["주소"]).includes(norm(q));
       const okTeam = teamFilter === "전체" || r["팀"] === teamFilter;
       const okStatus = statusFilter === "전체" || stationStatus(r, excludedModels) === statusFilter;
       const okPreset = stationMatchesPreset(r, presetFilter, excludedModels);
       return okQ && okTeam && okStatus && okPreset;
     });
-  }, [rows, q, teamFilter, statusFilter, presetFilter, excludedModels]);
+  }, [expandedRows, q, teamFilter, statusFilter, presetFilter, excludedModels]);
 
   const shown = compact ? filtered.slice(0, perPage) : filtered.slice((page - 1) * perPage, page * perPage);
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
@@ -996,14 +1009,14 @@ function StationTable({ rows, compact, presetFilter, onClearPreset, excludedMode
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       {!compact && presetFilter && (
         <div className="mb-3 flex items-center justify-between gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-700">
-          <span>대시보드에서 선택한 대상만 보고 있어요: <b>{presetFilter.label}</b> · {filtered.length}국소</span>
+          <span>대시보드에서 선택한 대상만 보고 있어요: <b>{presetFilter.label}</b> · {filtered.length}건</span>
           <button onClick={onClearPreset} className="flex items-center gap-1 rounded-md bg-white px-2 py-1 font-medium text-blue-600 hover:bg-blue-100">
             <X size={12} /> 필터 해제
           </button>
         </div>
       )}
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h3 className="text-sm font-semibold text-slate-700">기지국 현황 <span className="font-normal text-slate-400">({filtered.length}국소)</span></h3>
+        <h3 className="text-sm font-semibold text-slate-700">기지국 현황 <span className="font-normal text-slate-400">({filtered.length}건 · 정류기 모델별로 행이 나뉩니다)</span></h3>
         {!compact && (
           <div className="flex flex-wrap gap-2">
             <div className="relative">
@@ -1047,7 +1060,7 @@ function StationTable({ rows, compact, presetFilter, onClearPreset, excludedMode
                 <td className="px-2 py-2 font-medium text-slate-700">{r["국소명"] || "-"}</td>
                 <td className="px-2 py-2 text-slate-500">{r["주소"] || "-"}</td>
                 <td className="px-2 py-2 text-slate-500">{r["팀"] || "-"}</td>
-                <td className="px-2 py-2 text-slate-500"><StationModelList station={r} /></td>
+                <td className="px-2 py-2 text-slate-500 whitespace-nowrap">{r._model || "-"}</td>
                 <td className="px-2 py-2"><StatusBadge status={stationStatus(r, excludedModels)} /></td>
                 <td className="px-2 py-2"><ActionBadge text={stationAction(r)} /></td>
               </tr>
