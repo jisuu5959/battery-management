@@ -19,12 +19,17 @@ const norm = (s) => String(s ?? "").replace(/\s+/g, "").replace(/[()]/g, "").toL
 /* --------------------------- Supabase (실서비스 배포용 저장소) --------------------------- */
 // Vercel에 배포할 때 프로젝트 설정 > Environment Variables 에 아래 두 값을 넣어주세요.
 // VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY (Supabase 대시보드 > Project Settings > API 에서 확인)
-// .trim()으로 앞뒤 공백/줄바꿈을 제거한다 — 환경변수 입력창에 복붙할 때 섞여 들어가면
-// "Invalid path specified in request URL" 같은 알아채기 힘든 에러가 난다.
-const SUPABASE_URL = String(import.meta.env.VITE_SUPABASE_URL || "").trim().replace(/\/+$/, "");
+// .trim()으로 앞뒤 공백/줄바꿈을 제거하고, 혹시 URL에 /rest/v1 같은 경로가 실수로 같이 들어가 있으면
+// (라이브러리가 또 /rest/v1을 붙이면서 "v1/rest/v1"처럼 중복돼 404가 난다) 프로젝트 루트 주소만 남긴다.
+const SUPABASE_URL = String(import.meta.env.VITE_SUPABASE_URL || "")
+  .trim()
+  .replace(/\/(rest|auth|storage|realtime|functions)\/v\d+.*$/i, "") // 실수로 딸려 들어간 API 경로 제거
+  .replace(/\/+$/, ""); // 끝 슬래시 제거
 const SUPABASE_ANON_KEY = String(import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.error("[supabase] VITE_SUPABASE_URL 또는 VITE_SUPABASE_ANON_KEY가 비어있습니다. Vercel 환경변수를 확인하세요.");
+} else if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(SUPABASE_URL)) {
+  console.error(`[supabase] VITE_SUPABASE_URL 형식이 예상과 달라요: "${SUPABASE_URL}" — https://프로젝트ref.supabase.co 형태여야 합니다.`);
 }
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
