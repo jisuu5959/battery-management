@@ -19,10 +19,14 @@ const norm = (s) => String(s ?? "").replace(/\s+/g, "").replace(/[()]/g, "").toL
 /* --------------------------- Supabase (실서비스 배포용 저장소) --------------------------- */
 // Vercel에 배포할 때 프로젝트 설정 > Environment Variables 에 아래 두 값을 넣어주세요.
 // VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY (Supabase 대시보드 > Project Settings > API 에서 확인)
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+// .trim()으로 앞뒤 공백/줄바꿈을 제거한다 — 환경변수 입력창에 복붙할 때 섞여 들어가면
+// "Invalid path specified in request URL" 같은 알아채기 힘든 에러가 난다.
+const SUPABASE_URL = String(import.meta.env.VITE_SUPABASE_URL || "").trim().replace(/\/+$/, "");
+const SUPABASE_ANON_KEY = String(import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error("[supabase] VITE_SUPABASE_URL 또는 VITE_SUPABASE_ANON_KEY가 비어있습니다. Vercel 환경변수를 확인하세요.");
+}
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /** window.storage와 동일한 모양({key, value})으로 맞춘 Supabase 기반 key-value 저장소.
  *  Claude 아티팩트 밖(정식 배포)에서는 window.storage가 없으므로 이걸 대신 쓴다.
