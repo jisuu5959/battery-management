@@ -960,12 +960,35 @@ function ActionBadge({ text }) {
 }
 
 /** 기지국 현황 표를 엑셀(xlsx)로 내려받는다. */
+/** 기지국 현황에서 화면에 보이는 대상(정류기 모델별로 나뉜 행) 기준으로, 처음 업로드한 엑셀과
+ *  같은 항목 구성(통합시설코드~불량여부)으로 정류기 1개당 1행씩 엑셀을 만든다. */
+const EXPORT_FIELDS = [
+  ["통합시설코드", "통합시설코드"], ["국소명", "국소명"], ["본부", "본부"], ["SKT팀", "SKT팀"], ["팀", "팀(현장운용팀)"],
+  ["주소", "주소"], ["국사형태", "국사형태"],
+  ["5G", "5G"], ["4G", "4G"], ["3G", "3G"],
+  ["ARRU_5G", "5G ARRU(식)"], ["RU", "RU(식)"], ["L9TU_5G", "5G L9TU(식)"],
+  ["링MUX_RT_RU_L9TU", "링MUX RT 수용 RU/L9TU"], ["중계기", "중계기"],
+];
+const EXPORT_RECT_FIELDS = [
+  ["번호", "정류기번호"], ["정류기모델", "정류기모델"], ["서비스", "서비스"], ["부하전류", "부하전류"],
+  ["축전지번호", "축전지번호"], ["규격", "규격(Ah)"], ["전압", "전압"], ["축전지상태", "축전지상태"],
+  ["양호", "양호"], ["열화", "열화"], ["열화2", "열화2"], ["불량", "불량"],
+  ["측정일시", "내부저항측정일시"], ["대개체여부", "대개체여부"], ["불량여부", "불량여부"],
+];
+
 function exportStationsToExcel(stations, label, excludedModels) {
-  const headers = ["국소명", "주소", "현장운용팀", "정류기모델", "상태", "조치여부"];
-  const aoa = [headers, ...stations.map((s) => [
-    s["국소명"] || "", s["주소"] || "", s["팀"] || "",
-    s._model || stationModels(s), stationStatus(s, excludedModels), stationAction(s),
-  ])];
+  const headers = [...EXPORT_FIELDS.map(([, h]) => h), ...EXPORT_RECT_FIELDS.map(([, h]) => h), "상태", "조치여부"];
+  const aoa = [headers];
+  stations.forEach((s) => {
+    const stationCells = EXPORT_FIELDS.map(([f]) => s[f] ?? "");
+    const status = stationStatus(s, excludedModels);
+    const action = stationAction(s);
+    const rects = s.rectifiers && s.rectifiers.length ? s.rectifiers : [{}];
+    rects.forEach((r) => {
+      const rectCells = EXPORT_RECT_FIELDS.map(([f]) => r[f] ?? "");
+      aoa.push([...stationCells, ...rectCells, status, action]);
+    });
+  });
   const ws = XLSX.utils.aoa_to_sheet(aoa);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "기지국현황");
@@ -992,7 +1015,7 @@ function exportStockToExcel(stock, targets) {
     ["잔여", ...STOCK_ROWS.map((type) => stockTotal(type) - stockUsage(type))],
   ];
 
-  const targetHeaders = ["종류", "국소명", "주소", "현장운용팀", "W", "DU", "5G", "작업예정일", "비고"];
+  const targetHeaders = ["종류", "국소명", "주소", "현장운용팀", "W", "DU", "5G", "작업 예정(완료)일", "비고"];
   const targetAoa = [targetHeaders, ...(targets || []).map((t) => [
     t.종류 || "", t.국소명 || "", t.주소 || "", t.현장운용팀 || "", t.W || "", t.DU || "", t["5G"] || "", t.작업예정일 || "", t.비고 || "",
   ])];
@@ -1545,7 +1568,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
     }
   };
 
-  const HEADERS = ["종류", "국소명", "주소", "현장운용팀", "W", "DU", "5G", "작업예정일", "비고"];
+  const HEADERS = ["종류", "국소명", "주소", "현장운용팀", "W", "DU", "5G", "작업 예정(완료)일", "비고"];
   const colCount = HEADERS.length + (isAdmin ? 1 : 0);
 
   return (
