@@ -1522,6 +1522,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
   const [open, setOpen] = useState(true);
   const [tab, setTab] = useState("전체");
   const [saveState, setSaveState] = useState("idle"); // idle | saving | saved
+  const [editing, setEditing] = useState(false); // 관리자 모드에서도, 저장을 누르면 이 값이 꺼지면서 화면이 일반 모드처럼 읽기 전용으로 바뀐다.
 
   useEffect(() => {
     (async () => {
@@ -1562,6 +1563,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
     try {
       await kv.set(storageKey, JSON.stringify(records));
       setSaveState("saved");
+      setEditing(false); // 저장되면 수정 화면(입력칸)을 닫고 일반 모드처럼 읽기 전용으로 보여준다.
     } catch (e) {
       setSaveState("idle");
     } finally {
@@ -1569,8 +1571,9 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
     }
   };
 
+  const canEdit = isAdmin && editing;
   const HEADERS = ["종류", "국소명", "주소", "현장운용팀", "W", "DU", "5G", "작업 예정(완료)일", "완료여부", "비고"];
-  const colCount = HEADERS.length + (isAdmin ? 1 : 0);
+  const colCount = HEADERS.length + (canEdit ? 1 : 0);
 
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
@@ -1606,6 +1609,11 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                 <span className="flex items-center gap-1 text-[11px] text-slate-400">
                   <Lock size={11} /> 대상 추가·수정·저장은 관리자 모드에서만 가능합니다
                 </span>
+              ) : !editing ? (
+                <button onClick={() => setEditing(true)}
+                  className="flex items-center gap-1 rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-slate-800">
+                  <Plus size={13} className="rotate-45" /> 수정
+                </button>
               ) : (
                 <>
                   <button onClick={handleSave}
@@ -1628,19 +1636,19 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                   {HEADERS.map((h) => (
                     <th key={h} className="px-3 py-2.5 font-semibold">{h}</th>
                   ))}
-                  {isAdmin && <th className="px-2 py-2.5" />}
+                  {canEdit && <th className="px-2 py-2.5" />}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filtered.length === 0 && (
                   <tr><td colSpan={colCount} className="px-3 py-6 text-slate-400">
-                    {isAdmin ? "대상을 추가하고 정보를 입력해주세요." : "등록된 대상이 없습니다."}
+                    {canEdit ? "대상을 추가하고 정보를 입력해주세요." : "등록된 대상이 없습니다."}
                   </td></tr>
                 )}
                 {filtered.map((row, idx) => (
                   <tr key={row.id} className={`${idx % 2 === 1 ? "bg-slate-50/60" : "bg-white"} transition-colors hover:bg-slate-50`}>
                     <td className="px-2 py-1.5">
-                      {isAdmin ? (
+                      {canEdit ? (
                         <select value={row.종류 || STOCK_ROWS[0]} onChange={(e) => editCell(row.id, "종류", e.target.value)}
                           className={`rounded-full border-0 px-2 py-1 text-[11px] font-medium outline-none ${chipStyleFor(row.종류)}`}>
                           {STOCK_ROWS.map((type) => <option key={type} value={type}>{type}</option>)}
@@ -1650,7 +1658,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                       )}
                     </td>
                     <td className="px-1 py-1.5">
-                      {isAdmin ? (
+                      {canEdit ? (
                         <input value={row.국소명} onChange={(e) => editCell(row.id, "국소명", e.target.value)} placeholder="국소명"
                           className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-center outline-none focus:border-slate-400" />
                       ) : (
@@ -1658,7 +1666,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                       )}
                     </td>
                     <td className="px-1 py-1.5">
-                      {isAdmin ? (
+                      {canEdit ? (
                         <input value={row.주소} onChange={(e) => editCell(row.id, "주소", e.target.value)} placeholder="주소"
                           className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-center outline-none focus:border-slate-400" />
                       ) : (
@@ -1666,15 +1674,18 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                       )}
                     </td>
                     <td className="px-1 py-1.5">
-                      {isAdmin ? (
-                        <input value={row.현장운용팀} onChange={(e) => editCell(row.id, "현장운용팀", e.target.value)} placeholder="현장운용팀"
-                          className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-center outline-none focus:border-slate-400" />
+                      {canEdit ? (
+                        <select value={row.현장운용팀 || ""} onChange={(e) => editCell(row.id, "현장운용팀", e.target.value)}
+                          className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-center outline-none focus:border-slate-400">
+                          <option value="">선택</option>
+                          {VALID_TEAMS.map((t) => <option key={t} value={t}>{t}</option>)}
+                        </select>
                       ) : (
                         <span className="text-slate-500">{row.현장운용팀 || <span className="text-slate-300">-</span>}</span>
                       )}
                     </td>
                     <td className="px-1 py-1.5">
-                      {isAdmin ? (
+                      {canEdit ? (
                         <input value={row.W} onChange={(e) => editCell(row.id, "W", e.target.value)} placeholder="-"
                           className="w-full rounded-md border border-slate-200 bg-white px-1 py-1.5 text-center outline-none focus:border-slate-400" />
                       ) : (
@@ -1684,7 +1695,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                       )}
                     </td>
                     <td className="px-1 py-1.5">
-                      {isAdmin ? (
+                      {canEdit ? (
                         <input value={row.DU} onChange={(e) => editCell(row.id, "DU", e.target.value)} placeholder="-"
                           className="w-full rounded-md border border-slate-200 bg-white px-1 py-1.5 text-center outline-none focus:border-slate-400" />
                       ) : (
@@ -1694,7 +1705,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                       )}
                     </td>
                     <td className="px-1 py-1.5">
-                      {isAdmin ? (
+                      {canEdit ? (
                         <input value={row["5G"]} onChange={(e) => editCell(row.id, "5G", e.target.value)} placeholder="-"
                           className="w-full rounded-md border border-slate-200 bg-white px-1 py-1.5 text-center outline-none focus:border-slate-400" />
                       ) : (
@@ -1704,7 +1715,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                       )}
                     </td>
                     <td className="px-1 py-1.5">
-                      {isAdmin ? (
+                      {canEdit ? (
                         <input type="date" value={row.작업예정일} onChange={(e) => editCell(row.id, "작업예정일", e.target.value)}
                           className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-center text-[11px] outline-none focus:border-slate-400" />
                       ) : (
@@ -1715,7 +1726,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                       )}
                     </td>
                     <td className="px-1 py-1.5">
-                      {isAdmin ? (
+                      {canEdit ? (
                         <select value={row.완료여부 || "대기"} onChange={(e) => editCell(row.id, "완료여부", e.target.value)}
                           className={`rounded-full border-0 px-2 py-1 text-[11px] font-medium outline-none ${
                             row.완료여부 === "완료" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
@@ -1730,7 +1741,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                       )}
                     </td>
                     <td className="px-1 py-1.5">
-                      {isAdmin ? (
+                      {canEdit ? (
                         <input value={row.비고} onChange={(e) => editCell(row.id, "비고", e.target.value)}
                           placeholder="비고"
                           className="w-full rounded-md border border-transparent bg-transparent px-2 py-1.5 text-center outline-none focus:border-slate-300 focus:bg-white" />
@@ -1738,7 +1749,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                         <span className="text-slate-500">{row.비고 || <span className="text-slate-300">-</span>}</span>
                       )}
                     </td>
-                    {isAdmin && (
+                    {canEdit && (
                       <td className="px-2 py-1.5">
                         <button onClick={() => removeRow(row.id)}
                           className="rounded-md p-1.5 text-slate-300 transition-colors hover:bg-red-50 hover:text-red-500">
