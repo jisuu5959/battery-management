@@ -658,9 +658,13 @@ function LabelValueRow({ pairs, cols }) {
 function LocationDetail({ rows, query, setQuery, actaHistory }) {
   const [historyView, setHistoryView] = useState(null); // { rectNo, label } | null
   const [selectedCode, setSelectedCode] = useState(null);
+  const [inputText, setInputText] = useState(query); // 입력창은 따로 두고, "검색" 버튼을 눌러야 실제 검색어(query)에 반영된다.
 
   const trimmed = query.trim();
   const codeOf = (r) => normCode(r["통합시설코드"]) || norm(r["국소명"]);
+
+  const runSearch = () => setQuery(inputText);
+  const resetSearch = () => { setInputText(""); setQuery(""); };
 
   // F열(공용대표시설명=국소명) 기준으로 2글자 이상 포함되는 국소를 모두 후보로 보여준다.
   const matches = useMemo(() => {
@@ -697,14 +701,21 @@ function LocationDetail({ rows, query, setQuery, actaHistory }) {
         <div className="relative flex-1">
           <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") runSearch(); }}
             placeholder="국소명 검색 (2글자 이상)"
             className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-blue-400 focus:bg-white"
           />
         </div>
         <button
-          onClick={() => setQuery("")}
+          onClick={runSearch}
+          className="flex items-center justify-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          <Search size={14} /> 검색
+        </button>
+        <button
+          onClick={resetSearch}
           className="flex items-center justify-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 hover:bg-slate-50"
         >
           <RotateCcw size={14} /> 초기화
@@ -871,6 +882,12 @@ function TeamStatus({ rows, excludedModels }) {
       byTeam[t] = byTeam[t] || { team: t, total: 0, bad: 0 };
       (station.rectifiers || []).forEach((rect) => {
         if (!isCountableRect(rect, excludedModels)) return;
+        // 홈 대시보드와 동일한 분류 기준: RT(1차) → 2V(제한 없음) → 12V(서비스가 W/DU/5G인 것만)
+        // 이 세 조건에 해당하지 않는 행(전압 없음, 12V인데 서비스가 다른 경우 등)은 대시보드처럼 집계에서 제외한다.
+        const isRt = eqLoose(rect["서비스"], "RT");
+        const is2v = eqLoose(rect["전압"], "2V");
+        const is12vCounted = eqLoose(rect["전압"], "12V") && ["W", "DU", "5G"].some((s) => eqLoose(rect["서비스"], s));
+        if (!isRt && !is2v && !is12vCounted) return;
         byTeam[t].total += 1;
         if (eqLoose(rect["불량여부"], "불량")) byTeam[t].bad += 1;
       });
@@ -951,6 +968,12 @@ function expandStationsByModel(stations) {
 function stationAction(station) {
   const actions = [...new Set((station.rectifiers || []).map((r) => r.대개체여부).filter(Boolean))];
   return actions.length ? actions.join(", ") : "";
+}
+
+/** 국소(또는 정류기 모델별로 나뉜 행)의 정류기들에서 내부저항측정일시(BT열)를 모아 콤마로 이어붙인다. */
+function stationMeasuredAt(station) {
+  const dates = [...new Set((station.rectifiers || []).map((r) => r.측정일시).filter(Boolean))];
+  return dates.length ? dates.join(", ") : "";
 }
 
 function ActionBadge({ text }) {
@@ -1100,11 +1123,12 @@ function StationTable({ rows, compact, presetFilter, onClearPreset, excludedMode
               <th className="px-2 py-2 font-medium">정류기 모델명</th>
               <th className="px-2 py-2 font-medium">상태</th>
               <th className="px-2 py-2 font-medium">조치여부</th>
+              <th className="px-2 py-2 font-medium">내부저항측정일시</th>
             </tr>
           </thead>
           <tbody>
             {shown.length === 0 && (
-              <tr><td colSpan={6} className="px-2 py-6 text-center text-slate-400">표시할 데이터가 없습니다.</td></tr>
+              <tr><td colSpan={7} className="px-2 py-6 text-center text-slate-400">표시할 데이터가 없습니다.</td></tr>
             )}
             {shown.map((r, i) => (
               <tr key={i} className="border-t border-slate-100 hover:bg-slate-50">
@@ -1114,6 +1138,7 @@ function StationTable({ rows, compact, presetFilter, onClearPreset, excludedMode
                 <td className="px-2 py-2 text-slate-500 whitespace-nowrap">{r._model || "-"}</td>
                 <td className="px-2 py-2"><StatusBadge status={stationStatus(r, excludedModels)} /></td>
                 <td className="px-2 py-2"><ActionBadge text={stationAction(r)} /></td>
+                <td className="px-2 py-2 text-slate-500 whitespace-nowrap">{stationMeasuredAt(r) || "-"}</td>
               </tr>
             ))}
           </tbody>
@@ -1243,7 +1268,9 @@ function BatteryOverviewDashboard({ rows, lastUpdatedAt, onDrill, excludedModels
                 (2V:{" "}
                 <button onClick={() => drill({ voltage: "2V", label: "2V 전체" })} className="font-medium text-slate-500 hover:text-blue-600 hover:underline">{fmt(v2.total)}조</button>
                 {" | "}12V:{" "}
-                <button onClick={() => drill({ voltage: "12V", label: "12V 전체" })} className="font-medium text-slate-500 hover:text-blue-600 hover:underline">{fmt(v12.total)}조</button>)
+                <button onClick={() => drill({ voltage: "12V", label: "12V 전체" })} className="font-medium text-slate-500 hover:text-blue-600 hover:underline">{fmt(v12.total)}조</button>
+                {" | "}RT:{" "}
+                <button onClick={() => drill({ service: "RT", label: "RT 전체" })} className="font-medium text-slate-500 hover:text-blue-600 hover:underline">{fmt(rt.total)}조</button>)
               </p>
             </div>
           </div>
@@ -1262,7 +1289,9 @@ function BatteryOverviewDashboard({ rows, lastUpdatedAt, onDrill, excludedModels
                 (2V:{" "}
                 <button onClick={() => drill({ voltage: "2V", badOnly: true, label: "2V 불량" })} className="font-medium text-slate-500 hover:text-red-600 hover:underline">{fmt(v2.bad)}조</button>
                 {" | "}12V:{" "}
-                <button onClick={() => drill({ voltage: "12V", badOnly: true, label: "12V 불량" })} className="font-medium text-slate-500 hover:text-red-600 hover:underline">{fmt(v12.bad)}조</button>)
+                <button onClick={() => drill({ voltage: "12V", badOnly: true, label: "12V 불량" })} className="font-medium text-slate-500 hover:text-red-600 hover:underline">{fmt(v12.bad)}조</button>
+                {" | "}RT:{" "}
+                <button onClick={() => drill({ service: "RT", badOnly: true, label: "RT 불량" })} className="font-medium text-slate-500 hover:text-red-600 hover:underline">{fmt(rt.bad)}조</button>)
               </p>
             </div>
           </div>
