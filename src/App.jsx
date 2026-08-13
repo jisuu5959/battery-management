@@ -1547,7 +1547,10 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
 
-  const filtered = tab === "전체" ? records : records.filter((r) => String(r.종류).startsWith(tab));
+  const [teamFilter, setTeamFilter] = useState("전체");
+  const filtered = records
+    .filter((r) => tab === "전체" || String(r.종류).startsWith(tab))
+    .filter((r) => teamFilter === "전체" || r.현장운용팀 === teamFilter);
 
   const addRow = () =>
     setRecords((p) => [...p, normalizeTargetRecord({
@@ -1594,15 +1597,22 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
       {open && (
         <div className="border-t border-slate-100">
           <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
-            <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-1">
-              {["전체", "2V", "12V"].map((t) => (
-                <button key={t} onClick={() => setTab(t)}
-                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                    tab === t ? TYPE_STYLE[t].tabActive : "text-slate-500 hover:text-slate-700"
-                  }`}>
-                  {t === "전체" ? "전체" : `${t} 축전지`}
-                </button>
-              ))}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-1">
+                {["전체", "2V", "12V"].map((t) => (
+                  <button key={t} onClick={() => setTab(t)}
+                    className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                      tab === t ? TYPE_STYLE[t].tabActive : "text-slate-500 hover:text-slate-700"
+                    }`}>
+                    {t === "전체" ? "전체" : `${t} 축전지`}
+                  </button>
+                ))}
+              </div>
+              <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}
+                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-600 outline-none focus:border-slate-400">
+                <option value="전체">현장운용팀 전체</option>
+                {VALID_TEAMS.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
             </div>
             <div className="flex items-center gap-2">
               {!isAdmin ? (
