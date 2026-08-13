@@ -1591,9 +1591,11 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
   }, [storageKey]);
 
   const [teamFilter, setTeamFilter] = useState("전체");
+  const [doneFilter, setDoneFilter] = useState("전체");
   const filtered = records
     .filter((r) => tab === "전체" || String(r.종류).startsWith(tab))
-    .filter((r) => teamFilter === "전체" || r.현장운용팀 === teamFilter);
+    .filter((r) => teamFilter === "전체" || r.현장운용팀 === teamFilter)
+    .filter((r) => doneFilter === "전체" || (r.완료여부 || "대기") === doneFilter);
 
   const addRow = () =>
     setRecords((p) => [...p, normalizeTargetRecord({
@@ -1655,6 +1657,12 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                 className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-600 outline-none focus:border-slate-400">
                 <option value="전체">현장운용팀 전체</option>
                 {VALID_TEAMS.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+              <select value={doneFilter} onChange={(e) => setDoneFilter(e.target.value)}
+                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-600 outline-none focus:border-slate-400">
+                <option value="전체">완료여부 전체</option>
+                <option value="대기">대기</option>
+                <option value="완료">완료</option>
               </select>
             </div>
             <div className="flex items-center gap-2">
@@ -1854,7 +1862,7 @@ function BatteryStockPage({ isAdmin }) {
     <div className="space-y-4">
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
-          <div className="rounded-md border border-slate-300 px-6 py-1.5 text-sm font-semibold text-slate-700">축전지 재고</div>
+          <div className="rounded-md border border-slate-300 px-6 py-1.5 text-sm font-semibold text-slate-700">축전지 재고 <span className="font-normal text-slate-400">(단위: 조)</span></div>
           <div className="flex items-center gap-2">
             {isAdmin ? (
               <button onClick={handleStockSave}
