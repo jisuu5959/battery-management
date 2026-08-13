@@ -1062,6 +1062,7 @@ function exportStockToExcel(stock, targets) {
 function StationTable({ rows, compact, presetFilter, onClearPreset, excludedModels }) {
   const [q, setQ] = useState("");
   const [teamFilter, setTeamFilter] = useState("전체");
+  const [modelFilter, setModelFilter] = useState("전체");
   const [statusFilter, setStatusFilter] = useState("전체");
   const [page, setPage] = useState(1);
   const perPage = compact ? 5 : 10;
@@ -1072,16 +1073,18 @@ function StationTable({ rows, compact, presetFilter, onClearPreset, excludedMode
 
   // 국소 1개를 정류기 모델명별로 쪼갠 뒤 필터링한다 — 그래야 상태·조치여부도 모델 단위로 정확히 표시된다.
   const expandedRows = useMemo(() => expandStationsByModel(rows), [rows]);
+  const models = useMemo(() => ["전체", ...new Set(expandedRows.map((r) => r._model).filter(Boolean))].sort(), [expandedRows]);
 
   const filtered = useMemo(() => {
     return expandedRows.filter((r) => {
       const okQ = !q || norm(r["국소명"]).includes(norm(q)) || norm(r["주소"]).includes(norm(q));
       const okTeam = teamFilter === "전체" || r["팀"] === teamFilter;
+      const okModel = modelFilter === "전체" || r._model === modelFilter;
       const okStatus = statusFilter === "전체" || stationStatus(r, excludedModels) === statusFilter;
       const okPreset = stationMatchesPreset(r, presetFilter, excludedModels);
-      return okQ && okTeam && okStatus && okPreset;
+      return okQ && okTeam && okModel && okStatus && okPreset;
     });
-  }, [expandedRows, q, teamFilter, statusFilter, presetFilter, excludedModels]);
+  }, [expandedRows, q, teamFilter, modelFilter, statusFilter, presetFilter, excludedModels]);
 
   const shown = compact ? filtered.slice(0, perPage) : filtered.slice((page - 1) * perPage, page * perPage);
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
@@ -1108,6 +1111,10 @@ function StationTable({ rows, compact, presetFilter, onClearPreset, excludedMode
             <select value={teamFilter} onChange={(e) => { setTeamFilter(e.target.value); setPage(1); }}
               className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs outline-none">
               {teams.map((t) => <option key={t}>{t}</option>)}
+            </select>
+            <select value={modelFilter} onChange={(e) => { setModelFilter(e.target.value); setPage(1); }}
+              className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs outline-none">
+              {models.map((m) => <option key={m}>{m}</option>)}
             </select>
             <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
               className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs outline-none">
