@@ -1015,9 +1015,9 @@ function exportStockToExcel(stock, targets) {
     ["잔여", ...STOCK_ROWS.map((type) => stockTotal(type) - stockUsage(type))],
   ];
 
-  const targetHeaders = ["종류", "국소명", "주소", "현장운용팀", "W", "DU", "5G", "작업 예정(완료)일", "비고"];
+  const targetHeaders = ["종류", "국소명", "주소", "현장운용팀", "W", "DU", "5G", "작업 예정(완료)일", "완료여부", "비고"];
   const targetAoa = [targetHeaders, ...(targets || []).map((t) => [
-    t.종류 || "", t.국소명 || "", t.주소 || "", t.현장운용팀 || "", t.W || "", t.DU || "", t["5G"] || "", t.작업예정일 || "", t.비고 || "",
+    t.종류 || "", t.국소명 || "", t.주소 || "", t.현장운용팀 || "", t.W || "", t.DU || "", t["5G"] || "", t.작업예정일 || "", t.완료여부 || "대기", t.비고 || "",
   ])];
 
   const wb = XLSX.utils.book_new();
@@ -1513,6 +1513,7 @@ function normalizeTargetRecord(r) {
     DU: r.DU ?? "",
     "5G": r["5G"] ?? "",
     작업예정일: r.작업예정일 ?? r.작업예정 ?? "",
+    완료여부: r.완료여부 || "대기",
     비고: r.비고 ?? "",
   };
 }
@@ -1568,7 +1569,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
     }
   };
 
-  const HEADERS = ["종류", "국소명", "주소", "현장운용팀", "W", "DU", "5G", "작업 예정(완료)일", "비고"];
+  const HEADERS = ["종류", "국소명", "주소", "현장운용팀", "W", "DU", "5G", "작업 예정(완료)일", "완료여부", "비고"];
   const colCount = HEADERS.length + (isAdmin ? 1 : 0);
 
   return (
@@ -1711,6 +1712,21 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                           {row.작업예정일 || <span className="text-slate-300">-</span>}
                           <Lock size={10} className="text-slate-300" />
                         </span>
+                      )}
+                    </td>
+                    <td className="px-1 py-1.5">
+                      {isAdmin ? (
+                        <select value={row.완료여부 || "대기"} onChange={(e) => editCell(row.id, "완료여부", e.target.value)}
+                          className={`rounded-full border-0 px-2 py-1 text-[11px] font-medium outline-none ${
+                            row.완료여부 === "완료" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
+                          }`}>
+                          <option value="대기">대기</option>
+                          <option value="완료">완료</option>
+                        </select>
+                      ) : (
+                        <span className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                          row.완료여부 === "완료" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
+                        }`}>{row.완료여부 || "대기"}</span>
                       )}
                     </td>
                     <td className="px-1 py-1.5">
