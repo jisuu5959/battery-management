@@ -454,10 +454,11 @@ function deriveGrade(rect) {
   return null;
 }
 /** 모든 집계(대시보드/팀별현황/기지국현황 상태)의 전제조건: 불량여부(BV열)가 "대상X" 또는 "폐국"인 정류기, 그리고
- *  사용자가 지정해 제외한 정류기 모델명(Z열)은 집계에서 제외한다. */
+ *  사용자가 지정해 제외한 정류기 모델명(Z열)은 집계에서 제외한다. 빈칸이면 제외 대상이 아니므로 그대로 집계에 포함되고,
+ *  등급 정보가 없으면 stationStatus에서 자동으로 "양호"로 판정된다. */
 function isCountableRect(rect, excludedModels) {
   const v = rect?.["불량여부"];
-  if (v === "대상X" || v === "폐국") return false;
+  if (eqLoose(v, "대상X") || eqLoose(v, "폐국")) return false;
   if (excludedModels && excludedModels.length && excludedModels.includes(rect?.["정류기모델"])) return false;
   return true;
 }
@@ -970,10 +971,16 @@ function stationAction(station) {
   return actions.length ? actions.join(", ") : "";
 }
 
-/** 국소(또는 정류기 모델별로 나뉜 행)의 정류기들에서 내부저항측정일시(BT열)를 모아 콤마로 이어붙인다. */
+/** 국소(또는 정류기 모델별로 나뉜 행)의 정류기들에서 내부저항측정일시(BT열) 중 가장 최근 값 하나만 돌려준다. */
 function stationMeasuredAt(station) {
-  const dates = [...new Set((station.rectifiers || []).map((r) => r.측정일시).filter(Boolean))];
-  return dates.length ? dates.join(", ") : "";
+  const dates = (station.rectifiers || []).map((r) => r.측정일시).filter(Boolean);
+  if (!dates.length) return "";
+  return dates.reduce((latest, d) => {
+    const dLen = new Date(d).getTime();
+    const latestLen = new Date(latest).getTime();
+    if (Number.isNaN(dLen) || Number.isNaN(latestLen)) return String(d) > String(latest) ? d : latest; // 날짜로 못 읽으면 문자열 비교로 대체
+    return dLen > latestLen ? d : latest;
+  });
 }
 
 function ActionBadge({ text }) {
