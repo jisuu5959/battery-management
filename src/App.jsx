@@ -1267,49 +1267,47 @@ function BatteryOverviewDashboard({ rows, lastUpdatedAt, onDrill, excludedModels
       <>
       <p className="mb-3 text-[11px] text-slate-400">숫자를 클릭하면 기지국 현황에서 해당 대상들을 바로 확인할 수 있어요.</p>
 
-      {/* 전체 / 불량 요약 카드 */}
+      {/* 전체 / 불량 요약 카드 — 진한 색으로 채워서 한눈에 띄게 */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div className="overflow-hidden rounded-xl border border-blue-100 bg-gradient-to-b from-blue-50/60 to-white">
+        <div className="overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 to-blue-500 shadow-lg shadow-blue-500/20">
           <div className="flex items-center gap-4 p-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600"><Battery size={26} /></div>
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/20 text-white"><Battery size={26} /></div>
             <div>
-              <p className="text-sm font-semibold text-blue-600">전체 축전지</p>
+              <p className="text-sm font-semibold text-blue-100">전체 축전지</p>
               <button onClick={() => drill({ label: "전체 축전지" })}
-                className="text-3xl font-extrabold text-slate-800 hover:text-blue-600 hover:underline">
-                {fmt(total)}<span className="ml-1 text-lg font-bold text-slate-400">조</span>
+                className="text-3xl font-extrabold text-white hover:underline">
+                {fmt(total)}<span className="ml-1 text-lg font-bold text-blue-100">조</span>
               </button>
-              <p className="mt-0.5 text-xs text-slate-400">
+              <p className="mt-0.5 text-xs text-blue-100">
                 (2V:{" "}
-                <button onClick={() => drill({ voltage: "2V", label: "2V 전체" })} className="font-medium text-slate-500 hover:text-blue-600 hover:underline">{fmt(v2.total)}조</button>
+                <button onClick={() => drill({ voltage: "2V", label: "2V 전체" })} className="font-semibold text-white hover:underline">{fmt(v2.total)}조</button>
                 {" | "}12V:{" "}
-                <button onClick={() => drill({ voltage: "12V", label: "12V 전체" })} className="font-medium text-slate-500 hover:text-blue-600 hover:underline">{fmt(v12.total)}조</button>
+                <button onClick={() => drill({ voltage: "12V", label: "12V 전체" })} className="font-semibold text-white hover:underline">{fmt(v12.total)}조</button>
                 {" | "}RT:{" "}
-                <button onClick={() => drill({ service: "RT", label: "RT 전체" })} className="font-medium text-slate-500 hover:text-blue-600 hover:underline">{fmt(rt.total)}조</button>)
+                <button onClick={() => drill({ service: "RT", label: "RT 전체" })} className="font-semibold text-white hover:underline">{fmt(rt.total)}조</button>)
               </p>
             </div>
           </div>
-          <div className="h-1 bg-blue-500" />
         </div>
-        <div className="overflow-hidden rounded-xl border border-red-100 bg-gradient-to-b from-red-50/60 to-white">
+        <div className="overflow-hidden rounded-xl bg-gradient-to-br from-red-600 to-rose-500 shadow-lg shadow-red-500/20">
           <div className="flex items-center gap-4 p-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600"><AlertTriangle size={26} /></div>
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/20 text-white"><AlertTriangle size={26} /></div>
             <div>
-              <p className="text-sm font-semibold text-red-600">불량 축전지</p>
+              <p className="text-sm font-semibold text-red-100">불량 축전지</p>
               <button onClick={() => drill({ badOnly: true, label: "불량 축전지 전체" })}
-                className="text-3xl font-extrabold text-slate-800 hover:text-red-600 hover:underline">
-                {fmt(totalBad)}<span className="ml-1 text-lg font-bold text-slate-400">조</span>
+                className="text-3xl font-extrabold text-white hover:underline">
+                {fmt(totalBad)}<span className="ml-1 text-lg font-bold text-red-100">조</span>
               </button>
-              <p className="mt-0.5 text-xs text-slate-400">
+              <p className="mt-0.5 text-xs text-red-100">
                 (2V:{" "}
-                <button onClick={() => drill({ voltage: "2V", badOnly: true, label: "2V 불량" })} className="font-medium text-slate-500 hover:text-red-600 hover:underline">{fmt(v2.bad)}조</button>
+                <button onClick={() => drill({ voltage: "2V", badOnly: true, label: "2V 불량" })} className="font-semibold text-white hover:underline">{fmt(v2.bad)}조</button>
                 {" | "}12V:{" "}
-                <button onClick={() => drill({ voltage: "12V", badOnly: true, label: "12V 불량" })} className="font-medium text-slate-500 hover:text-red-600 hover:underline">{fmt(v12.bad)}조</button>
+                <button onClick={() => drill({ voltage: "12V", badOnly: true, label: "12V 불량" })} className="font-semibold text-white hover:underline">{fmt(v12.bad)}조</button>
                 {" | "}RT:{" "}
-                <button onClick={() => drill({ service: "RT", badOnly: true, label: "RT 불량" })} className="font-medium text-slate-500 hover:text-red-600 hover:underline">{fmt(rt.bad)}조</button>)
+                <button onClick={() => drill({ service: "RT", badOnly: true, label: "RT 불량" })} className="font-semibold text-white hover:underline">{fmt(rt.bad)}조</button>)
               </p>
             </div>
           </div>
-          <div className="h-1 bg-red-500" />
         </div>
       </div>
 
@@ -1448,15 +1446,19 @@ function BatteryOverviewDashboard({ rows, lastUpdatedAt, onDrill, excludedModels
 function HomePage({ rows, query, setQuery, actaHistory, lastUpdatedAt, onDrill, excludedModels }) {
   return (
     <div className="space-y-6">
-      <section>
-        <h2 className="mb-3 text-sm font-semibold text-slate-700">1. 대시보드</h2>
-        <BatteryOverviewDashboard rows={rows} lastUpdatedAt={lastUpdatedAt} onDrill={onDrill} excludedModels={excludedModels} />
-      </section>
+      {/* 모바일(lg 미만)에서는 기존처럼 1번 → 2번 순서로 세로로 쌓이고,
+          웹 화면(lg 이상)에서는 1번(대시보드)이 왼쪽, 2번(국소 상세 현황)이 오른쪽에 나란히 보인다. */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+        <section>
+          <h2 className="mb-3 text-sm font-semibold text-slate-700">1. 대시보드</h2>
+          <BatteryOverviewDashboard rows={rows} lastUpdatedAt={lastUpdatedAt} onDrill={onDrill} excludedModels={excludedModels} />
+        </section>
 
-      <section>
-        <h2 className="mb-3 text-sm font-semibold text-slate-700">2. 국소 상세 현황</h2>
-        <LocationDetail rows={rows.length ? rows : [SAMPLE_ROW]} query={query} setQuery={setQuery} actaHistory={actaHistory} />
-      </section>
+        <section>
+          <h2 className="mb-3 text-sm font-semibold text-slate-700">2. 국소 상세 현황</h2>
+          <LocationDetail rows={rows.length ? rows : [SAMPLE_ROW]} query={query} setQuery={setQuery} actaHistory={actaHistory} />
+        </section>
+      </div>
 
       <section>
         <h2 className="mb-3 text-sm font-semibold text-slate-700">3. 팀별 현황</h2>
