@@ -598,7 +598,7 @@ function StatCard({ icon: Icon, label, value, unit, tone }) {
         <Icon size={20} />
       </div>
       <div className="min-w-0">
-        <p className="truncate text-xs text-slate-500">{label}</p>
+        <p className="truncate text-sm text-slate-500">{label}</p>
         <p className="text-xl font-bold text-slate-800">
           {value.toLocaleString()}
           {unit && <span className="ml-0.5 text-sm font-medium text-slate-400">{unit}</span>}
@@ -620,7 +620,7 @@ function StatusBadge({ status }) {
     미측정: "bg-slate-100 text-slate-500",
   };
   return (
-    <span className={`inline-block whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${map[status] || "bg-slate-100 text-slate-500"}`}>
+    <span className={`inline-block whitespace-nowrap rounded-full px-2.5 py-0.5 text-sm font-medium ${map[status] || "bg-slate-100 text-slate-500"}`}>
       {status || "미확인"}
     </span>
   );
@@ -634,7 +634,7 @@ function GradeBadge({ grade }) {
     불량: "bg-red-50 text-red-600",
   };
   return (
-    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${map[grade] || "bg-slate-100 text-slate-500"}`}>
+    <span className={`inline-block rounded-full px-2.5 py-0.5 text-sm font-medium ${map[grade] || "bg-slate-100 text-slate-500"}`}>
       {grade || "미확인"}
     </span>
   );
@@ -647,8 +647,8 @@ function LabelValueRow({ pairs, cols }) {
     <div className={`grid ${gridClass}`}>
       {pairs.map(([label, value], i) => (
         <div key={i} className="border border-slate-200 -ml-px -mt-px">
-          <div className="bg-slate-50 px-2 py-1.5 text-[11px] font-medium text-slate-500">{label}</div>
-          <div className="px-2 py-1.5 text-sm text-slate-800 break-words">{value === "" || value === undefined ? "-" : String(value)}</div>
+          <div className="bg-slate-50 px-2 py-1.5 text-xs font-medium text-slate-500">{label}</div>
+          <div className="px-2 py-1.5 text-sm text-black break-words">{value === "" || value === undefined ? "-" : String(value)}</div>
         </div>
       ))}
     </div>
@@ -724,7 +724,7 @@ function LocationDetail({ rows, query, setQuery, actaHistory }) {
       </div>
 
       {trimmed.length === 1 && (
-        <p className="mb-3 text-xs text-amber-600">2글자 이상 입력하면 검색됩니다.</p>
+        <p className="mb-3 text-sm text-amber-600">2글자 이상 입력하면 검색됩니다.</p>
       )}
 
       {matches.length > 1 && (
@@ -734,7 +734,7 @@ function LocationDetail({ rows, query, setQuery, actaHistory }) {
             const active = code === selectedCode;
             return (
               <button key={code} onClick={() => setSelectedCode(code)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
                   active ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}>
                 {m["국소명"]}
@@ -757,25 +757,25 @@ function LocationDetail({ rows, query, setQuery, actaHistory }) {
             ]}
           />
           <div>
-            <p className="mb-1 text-xs font-semibold text-slate-500">시설구분</p>
+            <p className="mb-1 text-sm font-semibold text-slate-500">시설구분</p>
             <LabelValueRow pairs={[["5G", record["5G"]], ["4G", record["4G"]], ["3G", record["3G"]], ["계", record["계"]]]} />
           </div>
           <div>
-            <p className="mb-1 text-xs font-semibold text-slate-500">중계기</p>
+            <p className="mb-1 text-sm font-semibold text-slate-500">중계기</p>
             <LabelValueRow
               cols={5}
               pairs={[
                 ["5G ARRU(식)", record["ARRU_5G"]], ["RU(식)", record["RU"]], ["5G L9TU(식)", record["L9TU_5G"]],
-                ["링MUX RT 수용 RU/L9TU", record["링MUX_RT_RU_L9TU"]], ["중계기", record["중계기"]],
+                ["RU/L9TU", record["링MUX_RT_RU_L9TU"]], ["중계기", record["중계기"]],
               ]}
             />
           </div>
           <div>
             {!historyView ? (
               <>
-                <p className="mb-1 text-xs font-semibold text-slate-500">ACTA 내부저항측정 이력</p>
+                <p className="mb-1 text-sm font-semibold text-slate-500">ACTA 내부저항측정 이력</p>
                 <div className="overflow-x-auto rounded-lg border border-slate-200">
-                  <table className="w-full min-w-[960px] whitespace-nowrap text-left text-xs">
+                  <table className="w-full min-w-[960px] whitespace-nowrap text-left text-sm">
                     <thead className="bg-slate-50 text-slate-500">
                       <tr>
                         <th className="px-2 py-2 font-medium">정류기번호</th>
@@ -809,21 +809,21 @@ function LocationDetail({ rows, query, setQuery, actaHistory }) {
                               {r.번호}
                             </button>
                           </td>
-                          <td className="px-2 py-2">{r.정류기모델 || "-"}</td>
-                          <td className="px-2 py-2">{r.서비스 || "-"}</td>
-                          <td className="px-2 py-2">{r.부하전류 || "-"}</td>
-                          <td className="px-2 py-2">{r.축전지번호 || "-"}</td>
-                          <td className="px-2 py-2">{r.규격 || "-"}</td>
+                          <td className="px-2 py-2 text-black">{r.정류기모델 || "-"}</td>
+                          <td className="px-2 py-2 text-black">{r.서비스 || "-"}</td>
+                          <td className="px-2 py-2 text-black">{r.부하전류 || "-"}</td>
+                          <td className="px-2 py-2 text-black">{r.축전지번호 || "-"}</td>
+                          <td className="px-2 py-2 text-black">{r.규격 || "-"}</td>
                           <td className="px-2 py-2 font-medium text-blue-600">
                             {(() => { const h = backupBankMap.get(r.번호); return h ? `${h}h` : "-"; })()}
                           </td>
-                          <td className="px-2 py-2">{r.축전지상태 || "-"}</td>
-                          <td className="px-2 py-2">{r.양호 || "-"}</td>
-                          <td className="px-2 py-2">{r.열화 || "-"}</td>
-                          <td className="px-2 py-2">{r.열화2 || "-"}</td>
-                          <td className="px-2 py-2">{r.불량 || "-"}</td>
-                          <td className="px-2 py-2">{r.측정일시 || "-"}</td>
-                          <td className="px-2 py-2">{r.대개체여부 || "-"}</td>
+                          <td className="px-2 py-2 text-black">{r.축전지상태 || "-"}</td>
+                          <td className="px-2 py-2 text-black">{r.양호 || "-"}</td>
+                          <td className="px-2 py-2 text-black">{r.열화 || "-"}</td>
+                          <td className="px-2 py-2 text-black">{r.열화2 || "-"}</td>
+                          <td className="px-2 py-2 text-black">{r.불량 || "-"}</td>
+                          <td className="px-2 py-2 text-black">{r.측정일시 || "-"}</td>
+                          <td className="px-2 py-2 text-black">{r.대개체여부 || "-"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -833,13 +833,13 @@ function LocationDetail({ rows, query, setQuery, actaHistory }) {
             ) : (
               <div className="rounded-lg border border-slate-200">
                 <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2.5">
-                  <button onClick={() => setHistoryView(null)} className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-700">
+                  <button onClick={() => setHistoryView(null)} className="flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-slate-700">
                     <ArrowLeft size={14} /> 목록으로
                   </button>
                   <p className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
                     <History size={14} className="text-blue-500" /> {historyView.label} 변동 이력
                   </p>
-                  <span className="text-xs text-slate-400">{historyEntries.length}건</span>
+                  <span className="text-sm text-slate-400">{historyEntries.length}건</span>
                 </div>
                 {historyEntries.length === 0 ? (
                   <p className="px-3 py-8 text-center text-sm text-slate-400">
@@ -851,7 +851,7 @@ function LocationDetail({ rows, query, setQuery, actaHistory }) {
                       <li key={i} className="flex items-center justify-between gap-3 px-3 py-2.5 text-sm">
                         <span className="text-slate-500">{h.date}</span>
                         <GradeBadge grade={h.grade} />
-                        <span className="ml-auto text-xs text-slate-400">
+                        <span className="ml-auto text-sm text-slate-400">
                           {h.축전지번호 ? `축전지 ${h.축전지번호}` : ""}{h.부하전류 ? ` · 부하전류 ${h.부하전류}A` : ""}
                         </span>
                       </li>
@@ -904,7 +904,7 @@ function TeamStatus({ rows, excludedModels }) {
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h3 className="text-sm font-semibold text-slate-700">팀별 현황</h3>
-        <div className="flex gap-4 text-right text-xs">
+        <div className="flex gap-4 text-right text-sm">
           <div><p className="text-slate-400">전체 수량</p><p className="font-bold text-slate-700">{totalCnt.toLocaleString()} 조</p></div>
           <div><p className="text-slate-400">조불량 수량</p><p className="font-bold text-red-500">{badCnt.toLocaleString()} 조</p></div>
           <div><p className="text-slate-400">전체 불량률</p><p className="font-bold text-blue-600">{overallRate}%</p></div>
@@ -986,7 +986,7 @@ function stationMeasuredAt(station) {
 function ActionBadge({ text }) {
   if (!text) return <span className="text-slate-300">-</span>;
   const tone = text.includes("불용철거") ? "bg-violet-50 text-violet-600" : text.includes("대개체") ? "bg-amber-50 text-amber-600" : "bg-slate-100 text-slate-500";
-  return <span className={`inline-block whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${tone}`}>{text}</span>;
+  return <span className={`inline-block whitespace-nowrap rounded-full px-2.5 py-0.5 text-sm font-medium ${tone}`}>{text}</span>;
 }
 
 /** 기지국 현황 표를 엑셀(xlsx)로 내려받는다. */
@@ -997,7 +997,7 @@ const EXPORT_FIELDS = [
   ["주소", "주소"], ["국사형태", "국사형태"],
   ["5G", "5G"], ["4G", "4G"], ["3G", "3G"],
   ["ARRU_5G", "5G ARRU(식)"], ["RU", "RU(식)"], ["L9TU_5G", "5G L9TU(식)"],
-  ["링MUX_RT_RU_L9TU", "링MUX RT 수용 RU/L9TU"], ["중계기", "중계기"],
+  ["링MUX_RT_RU_L9TU", "RU/L9TU"], ["중계기", "중계기"],
 ];
 const EXPORT_RECT_FIELDS = [
   ["번호", "정류기번호"], ["정류기모델", "정류기모델"], ["서비스", "서비스"], ["부하전류", "부하전류"],
@@ -1092,7 +1092,7 @@ function StationTable({ rows, compact, presetFilter, onClearPreset, excludedMode
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       {!compact && presetFilter && (
-        <div className="mb-3 flex items-center justify-between gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-700">
+        <div className="mb-3 flex items-center justify-between gap-2 rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-700">
           <span>대시보드에서 선택한 대상만 보고 있어요: <b>{presetFilter.label}</b> · {filtered.length}건</span>
           <button onClick={onClearPreset} className="flex items-center gap-1 rounded-md bg-white px-2 py-1 font-medium text-blue-600 hover:bg-blue-100">
             <X size={12} /> 필터 해제
@@ -1106,29 +1106,29 @@ function StationTable({ rows, compact, presetFilter, onClearPreset, excludedMode
             <div className="relative">
               <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} placeholder="국소명 검색"
-                className="rounded-lg border border-slate-200 bg-slate-50 py-1.5 pl-8 pr-2 text-xs outline-none focus:border-blue-400 focus:bg-white" />
+                className="rounded-lg border border-slate-200 bg-slate-50 py-1.5 pl-8 pr-2 text-sm outline-none focus:border-blue-400 focus:bg-white" />
             </div>
             <select value={teamFilter} onChange={(e) => { setTeamFilter(e.target.value); setPage(1); }}
-              className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs outline-none">
+              className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm outline-none">
               {teams.map((t) => <option key={t}>{t}</option>)}
             </select>
             <select value={modelFilter} onChange={(e) => { setModelFilter(e.target.value); setPage(1); }}
-              className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs outline-none">
+              className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm outline-none">
               {models.map((m) => <option key={m}>{m}</option>)}
             </select>
             <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-              className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs outline-none">
+              className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm outline-none">
               {["전체", "양호", "열화", "조불량", "미측정"].map((s) => <option key={s}>{s}</option>)}
             </select>
             <button onClick={() => exportStationsToExcel(filtered, presetFilter?.label, excludedModels)}
-              className="flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100">
+              className="flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-sm font-medium text-emerald-700 hover:bg-emerald-100">
               <FileSpreadsheet size={14} /> 엑셀 다운로드
             </button>
           </div>
         )}
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left text-xs">
+        <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="bg-slate-50 text-slate-500">
             <tr>
               <th className="px-2 py-2 font-medium">국소명</th>
@@ -1159,7 +1159,7 @@ function StationTable({ rows, compact, presetFilter, onClearPreset, excludedMode
         </table>
       </div>
       {!compact && totalPages > 1 && (
-        <div className="mt-3 flex items-center justify-center gap-2 text-xs">
+        <div className="mt-3 flex items-center justify-center gap-2 text-sm">
           <button onClick={() => setPage(1)} disabled={page === 1}
             className="rounded-lg border border-slate-200 px-2 py-1.5 text-slate-500 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent">
             처음
@@ -1247,7 +1247,7 @@ function BatteryOverviewDashboard({ rows, lastUpdatedAt, onDrill, excludedModels
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600"><Battery size={18} /></div>
           <h2 className="text-base font-bold text-slate-800">축전지 현황</h2>
         </div>
-        <div className="flex items-center gap-2 text-xs text-slate-400">
+        <div className="flex items-center gap-2 text-sm text-slate-400">
           <span className="hidden sm:inline">기준일 : {lastUpdatedAt || "-"}</span>
           <RotateCcw size={13} className="hidden sm:inline" />
           <button onClick={() => setOpen((v) => !v)}
@@ -1258,14 +1258,14 @@ function BatteryOverviewDashboard({ rows, lastUpdatedAt, onDrill, excludedModels
       </div>
 
       {!open ? (
-        <button onClick={() => setOpen(true)} className="flex w-full flex-wrap items-center gap-x-4 gap-y-1 rounded-lg bg-slate-50 px-3 py-2.5 text-left text-xs hover:bg-slate-100">
+        <button onClick={() => setOpen(true)} className="flex w-full flex-wrap items-center gap-x-4 gap-y-1 rounded-lg bg-slate-50 px-3 py-2.5 text-left text-sm hover:bg-slate-100">
           <span className="text-slate-500">전체 <b className="text-blue-600">{fmt(total)}조</b></span>
           <span className="text-slate-500">불량 <b className="text-red-600">{fmt(totalBad)}조</b></span>
           <span className="text-slate-400">(2V {fmt(v2.total)}조 · 12V {fmt(v12.total)}조) — 눌러서 펼치기</span>
         </button>
       ) : (
       <>
-      <p className="mb-3 text-[11px] text-slate-400">숫자를 클릭하면 기지국 현황에서 해당 대상들을 바로 확인할 수 있어요.</p>
+      <p className="mb-3 text-xs text-slate-400">숫자를 클릭하면 기지국 현황에서 해당 대상들을 바로 확인할 수 있어요.</p>
 
       {/* 전체 / 불량 요약 카드 — 진한 색으로 채워서 한눈에 띄게 */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -1278,7 +1278,7 @@ function BatteryOverviewDashboard({ rows, lastUpdatedAt, onDrill, excludedModels
                 className="text-3xl font-extrabold text-white hover:underline">
                 {fmt(total)}<span className="ml-1 text-lg font-bold text-blue-100">조</span>
               </button>
-              <p className="mt-0.5 text-xs text-blue-100">
+              <p className="mt-0.5 text-sm text-blue-100">
                 (2V:{" "}
                 <button onClick={() => drill({ voltage: "2V", label: "2V 전체" })} className="font-semibold text-white hover:underline">{fmt(v2.total)}조</button>
                 {" | "}12V:{" "}
@@ -1298,7 +1298,7 @@ function BatteryOverviewDashboard({ rows, lastUpdatedAt, onDrill, excludedModels
                 className="text-3xl font-extrabold text-white hover:underline">
                 {fmt(totalBad)}<span className="ml-1 text-lg font-bold text-red-100">조</span>
               </button>
-              <p className="mt-0.5 text-xs text-red-100">
+              <p className="mt-0.5 text-sm text-red-100">
                 (2V:{" "}
                 <button onClick={() => drill({ voltage: "2V", badOnly: true, label: "2V 불량" })} className="font-semibold text-white hover:underline">{fmt(v2.bad)}조</button>
                 {" | "}12V:{" "}
@@ -1320,22 +1320,22 @@ function BatteryOverviewDashboard({ rows, lastUpdatedAt, onDrill, excludedModels
         <div className="space-y-3">
           <div className="rounded-xl border border-emerald-100 bg-emerald-50/40 p-3">
             <div className="mb-2 flex items-center gap-2">
-              <span className="flex h-6 w-9 items-center justify-center rounded-full bg-emerald-600 text-[10px] font-bold text-white">2V</span>
+              <span className="flex h-6 w-9 items-center justify-center rounded-full bg-emerald-600 text-[11px] font-bold text-white">2V</span>
               <p className="text-sm font-semibold text-emerald-700">2V 축전지</p>
             </div>
             <div className="grid grid-cols-3 divide-x divide-emerald-100 rounded-lg bg-white/70">
               <button onClick={() => drill({ voltage: "2V", label: "2V 전체" })} className="flex flex-col items-center gap-1 py-3 hover:bg-emerald-50">
-                <p className="text-xs text-slate-400">전체</p>
+                <p className="text-sm text-slate-400">전체</p>
                 <p className="text-xl font-extrabold text-emerald-600">{fmt(v2.total)}조</p>
                 <Battery size={20} className="text-emerald-500" />
               </button>
               <button onClick={() => drill({ voltage: "2V", badOnly: true, service: "DU", label: "2V DU 불량" })} className="flex flex-col items-center gap-1 py-3 hover:bg-red-50">
-                <p className="text-xs text-slate-400">DU 불량</p>
+                <p className="text-sm text-slate-400">DU 불량</p>
                 <p className="text-xl font-extrabold text-red-500">{fmt(v2.du)}조</p>
                 <AlertTriangle size={20} className="text-red-500" />
               </button>
               <button onClick={() => drill({ voltage: "2V", badOnly: true, service: "W", label: "2V W 불량" })} className="flex flex-col items-center gap-1 py-3 hover:bg-orange-50">
-                <p className="text-xs text-slate-400">W 불량</p>
+                <p className="text-sm text-slate-400">W 불량</p>
                 <p className="text-xl font-extrabold text-orange-500">{fmt(v2.w)}조</p>
                 <AlertTriangle size={20} className="text-orange-500" />
               </button>
@@ -1344,22 +1344,22 @@ function BatteryOverviewDashboard({ rows, lastUpdatedAt, onDrill, excludedModels
 
           <div className="rounded-xl border border-amber-100 bg-amber-50/40 p-3">
             <div className="mb-2 flex items-center gap-2">
-              <span className="flex h-6 w-11 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-white">12V</span>
+              <span className="flex h-6 w-11 items-center justify-center rounded-full bg-amber-500 text-[11px] font-bold text-white">12V</span>
               <p className="text-sm font-semibold text-amber-700">12V 축전지</p>
             </div>
             <div className="grid grid-cols-3 divide-x divide-amber-100 rounded-lg bg-white/70">
               <button onClick={() => drill({ voltage: "12V", label: "12V 전체" })} className="flex flex-col items-center gap-1 py-3 hover:bg-amber-50">
-                <p className="text-xs text-slate-400">전체</p>
+                <p className="text-sm text-slate-400">전체</p>
                 <p className="text-xl font-extrabold text-amber-600">{fmt(v12.total)}조</p>
                 <Battery size={20} className="text-amber-500" />
               </button>
               <button onClick={() => drill({ voltage: "12V", badOnly: true, service: "DU", label: "12V DU 불량" })} className="flex flex-col items-center gap-1 py-3 hover:bg-red-50">
-                <p className="text-xs text-slate-400">DU 불량</p>
+                <p className="text-sm text-slate-400">DU 불량</p>
                 <p className="text-xl font-extrabold text-red-500">{fmt(v12.du)}조</p>
                 <AlertTriangle size={20} className="text-red-500" />
               </button>
               <button onClick={() => drill({ voltage: "12V", badOnly: true, service: "W", label: "12V W 불량" })} className="flex flex-col items-center gap-1 py-3 hover:bg-orange-50">
-                <p className="text-xs text-slate-400">W 불량</p>
+                <p className="text-sm text-slate-400">W 불량</p>
                 <p className="text-xl font-extrabold text-orange-500">{fmt(v12.w)}조</p>
                 <AlertTriangle size={20} className="text-orange-500" />
               </button>
@@ -1368,17 +1368,17 @@ function BatteryOverviewDashboard({ rows, lastUpdatedAt, onDrill, excludedModels
 
           <div className="rounded-xl border border-violet-100 bg-violet-50/40 p-3">
             <div className="mb-2 flex items-center gap-2">
-              <span className="flex h-6 w-9 items-center justify-center rounded-full bg-violet-500 text-[10px] font-bold text-white">RT</span>
+              <span className="flex h-6 w-9 items-center justify-center rounded-full bg-violet-500 text-[11px] font-bold text-white">RT</span>
               <p className="text-sm font-semibold text-violet-700">RT 축전지</p>
             </div>
             <div className="grid grid-cols-2 divide-x divide-violet-100 rounded-lg bg-white/70">
               <button onClick={() => drill({ service: "RT", label: "RT 전체" })} className="flex flex-col items-center gap-1 py-3 hover:bg-violet-50">
-                <p className="text-xs text-slate-400">전체</p>
+                <p className="text-sm text-slate-400">전체</p>
                 <p className="text-xl font-extrabold text-violet-600">{fmt(rt.total)}조</p>
                 <Battery size={20} className="text-violet-500" />
               </button>
               <button onClick={() => drill({ service: "RT", badOnly: true, label: "RT 불량" })} className="flex flex-col items-center gap-1 py-3 hover:bg-red-50">
-                <p className="text-xs text-slate-400">불량</p>
+                <p className="text-sm text-slate-400">불량</p>
                 <p className="text-xl font-extrabold text-red-500">{fmt(rt.bad)}조</p>
                 <AlertTriangle size={20} className="text-red-500" />
               </button>
@@ -1394,7 +1394,7 @@ function BatteryOverviewDashboard({ rows, lastUpdatedAt, onDrill, excludedModels
           <p className="text-sm font-semibold text-slate-700">요약 표</p>
         </div>
         <div className="overflow-x-auto overflow-hidden rounded-xl border border-slate-200">
-          <table className="w-full min-w-[480px] text-center text-xs">
+          <table className="w-full min-w-[480px] text-center text-sm">
             <thead>
               <tr className="bg-slate-800 text-white">
                 <th className="px-3 py-2 font-medium">구분</th>
@@ -1496,7 +1496,7 @@ function CombinedStockTable({ values, onChange, targets, isAdmin }) {
 
   return (
     <div className="overflow-x-auto overflow-hidden rounded-lg border border-slate-200 shadow-sm">
-      <table className="w-full min-w-[620px] text-center text-xs">
+      <table className="w-full min-w-[620px] text-center text-sm">
         <thead>
           <tr className="bg-slate-50">
             <th className="border border-slate-200 px-3 py-2 font-semibold text-slate-500"></th>
@@ -1633,10 +1633,10 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
       >
         <div>
           <h3 className="text-sm font-semibold text-slate-700">대상</h3>
-          <p className="mt-0.5 text-[11px] text-slate-400">관리자 모드에서 국소명 · 주소 · 현장운용팀 · W · DU · 5G를 직접 입력합니다</p>
+          <p className="mt-0.5 text-xs text-slate-400">관리자 모드에서 국소명 · 주소 · 현장운용팀 · W · DU · 5G를 직접 입력합니다</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-slate-500 ring-1 ring-inset ring-slate-200">{records.length}건</span>
+          <span className="rounded-full bg-white px-2 py-0.5 text-xs font-medium text-slate-500 ring-1 ring-inset ring-slate-200">{records.length}건</span>
           {open ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
         </div>
       </button>
@@ -1648,7 +1648,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
               <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-1">
                 {["전체", "2V", "12V"].map((t) => (
                   <button key={t} onClick={() => setTab(t)}
-                    className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                    className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                       tab === t ? TYPE_STYLE[t].tabActive : "text-slate-500 hover:text-slate-700"
                     }`}>
                     {t === "전체" ? "전체" : `${t} 축전지`}
@@ -1656,12 +1656,12 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                 ))}
               </div>
               <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-600 outline-none focus:border-slate-400">
+                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-600 outline-none focus:border-slate-400">
                 <option value="전체">현장운용팀 전체</option>
                 {VALID_TEAMS.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
               <select value={doneFilter} onChange={(e) => setDoneFilter(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-600 outline-none focus:border-slate-400">
+                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-600 outline-none focus:border-slate-400">
                 <option value="전체">완료여부 전체</option>
                 <option value="대기">대기</option>
                 <option value="완료">완료</option>
@@ -1669,23 +1669,23 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
             </div>
             <div className="flex items-center gap-2">
               {!isAdmin ? (
-                <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                <span className="flex items-center gap-1 text-xs text-slate-400">
                   <Lock size={11} /> 대상 추가·수정·저장은 관리자 모드에서만 가능합니다
                 </span>
               ) : !editing ? (
                 <button onClick={() => setEditing(true)}
-                  className="flex items-center gap-1 rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-slate-800">
+                  className="flex items-center gap-1 rounded-lg bg-slate-700 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800">
                   <Plus size={13} className="rotate-45" /> 수정
                 </button>
               ) : (
                 <>
                   <button onClick={handleSave}
-                    className={`flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium shadow-sm transition-colors ${
+                    className={`flex items-center gap-1 rounded-lg border px-3 py-1.5 text-sm font-medium shadow-sm transition-colors ${
                       saveState === "saved" ? "border-emerald-200 bg-emerald-50 text-emerald-600" : "border-slate-200 text-slate-600 hover:bg-slate-50"
                     }`}>
                     {saveState === "saved" ? <><Check size={13} /> 저장됨</> : <><Save size={13} /> {saveState === "saving" ? "저장 중..." : "저장"}</>}
                   </button>
-                  <button onClick={addRow} className="flex items-center gap-1 rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-slate-800">
+                  <button onClick={addRow} className="flex items-center gap-1 rounded-lg bg-slate-700 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800">
                     <Plus size={13} /> 대상 추가
                   </button>
                 </>
@@ -1693,9 +1693,9 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[820px] text-center text-xs">
+            <table className="w-full min-w-[820px] text-center text-sm">
               <thead>
-                <tr className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
+                <tr className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                   {HEADERS.map((h) => (
                     <th key={h} className="px-3 py-2.5 font-semibold">{h}</th>
                   ))}
@@ -1713,11 +1713,11 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                     <td className="px-2 py-1.5">
                       {canEdit ? (
                         <select value={row.종류 || STOCK_ROWS[0]} onChange={(e) => editCell(row.id, "종류", e.target.value)}
-                          className={`rounded-full border-0 px-2 py-1 text-[11px] font-medium outline-none ${chipStyleFor(row.종류)}`}>
+                          className={`rounded-full border-0 px-2 py-1 text-xs font-medium outline-none ${chipStyleFor(row.종류)}`}>
                           {STOCK_ROWS.map((type) => <option key={type} value={type}>{type}</option>)}
                         </select>
                       ) : (
-                        <span className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium ${chipStyleFor(row.종류)}`}>{row.종류}</span>
+                        <span className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${chipStyleFor(row.종류)}`}>{row.종류}</span>
                       )}
                     </td>
                     <td className="px-1 py-1.5">
@@ -1752,7 +1752,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                         <input value={row.W} onChange={(e) => editCell(row.id, "W", e.target.value)} placeholder="-"
                           className="w-full rounded-md border border-slate-200 bg-white px-1 py-1.5 text-center outline-none focus:border-slate-400" />
                       ) : (
-                        <span className="inline-flex min-w-[1.75rem] justify-center rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
+                        <span className="inline-flex min-w-[1.75rem] justify-center text-slate-700">
                           {row.W === "" || row.W === undefined ? "-" : row.W}
                         </span>
                       )}
@@ -1762,7 +1762,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                         <input value={row.DU} onChange={(e) => editCell(row.id, "DU", e.target.value)} placeholder="-"
                           className="w-full rounded-md border border-slate-200 bg-white px-1 py-1.5 text-center outline-none focus:border-slate-400" />
                       ) : (
-                        <span className="inline-flex min-w-[1.75rem] justify-center rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
+                        <span className="inline-flex min-w-[1.75rem] justify-center text-slate-700">
                           {row.DU === "" || row.DU === undefined ? "-" : row.DU}
                         </span>
                       )}
@@ -1772,7 +1772,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                         <input value={row["5G"]} onChange={(e) => editCell(row.id, "5G", e.target.value)} placeholder="-"
                           className="w-full rounded-md border border-slate-200 bg-white px-1 py-1.5 text-center outline-none focus:border-slate-400" />
                       ) : (
-                        <span className="inline-flex min-w-[1.75rem] justify-center rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
+                        <span className="inline-flex min-w-[1.75rem] justify-center text-slate-700">
                           {row["5G"] === "" || row["5G"] === undefined ? "-" : row["5G"]}
                         </span>
                       )}
@@ -1780,7 +1780,7 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                     <td className="px-1 py-1.5">
                       {canEdit ? (
                         <input type="date" value={row.작업예정일} onChange={(e) => editCell(row.id, "작업예정일", e.target.value)}
-                          className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-center text-[11px] outline-none focus:border-slate-400" />
+                          className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-center text-xs outline-none focus:border-slate-400" />
                       ) : (
                         <span className="flex items-center justify-center gap-1 text-slate-500">
                           {row.작업예정일 || <span className="text-slate-300">-</span>}
@@ -1791,14 +1791,14 @@ function TargetTable({ records, setRecords, storageKey, isAdmin }) {
                     <td className="px-1 py-1.5">
                       {canEdit ? (
                         <select value={row.완료여부 || "대기"} onChange={(e) => editCell(row.id, "완료여부", e.target.value)}
-                          className={`rounded-full border-0 px-2 py-1 text-[11px] font-medium outline-none ${
+                          className={`rounded-full border-0 px-2 py-1 text-xs font-medium outline-none ${
                             row.완료여부 === "완료" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
                           }`}>
                           <option value="대기">대기</option>
                           <option value="완료">완료</option>
                         </select>
                       ) : (
-                        <span className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                        <span className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${
                           row.완료여부 === "완료" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"
                         }`}>{row.완료여부 || "대기"}</span>
                       )}
@@ -1868,18 +1868,18 @@ function BatteryStockPage({ isAdmin }) {
           <div className="flex items-center gap-2">
             {isAdmin ? (
               <button onClick={handleStockSave}
-                className={`flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium shadow-sm transition-colors ${
+                className={`flex items-center gap-1 rounded-lg border px-3 py-1.5 text-sm font-medium shadow-sm transition-colors ${
                   stockSaveState === "saved" ? "border-emerald-200 bg-emerald-50 text-emerald-600" : "border-slate-200 text-slate-600 hover:bg-slate-50"
                 }`}>
                 {stockSaveState === "saved" ? <><Check size={13} /> 저장됨</> : <><Save size={13} /> {stockSaveState === "saving" ? "저장 중..." : "저장"}</>}
               </button>
             ) : (
-              <span className="flex items-center gap-1 text-[11px] text-slate-400">
+              <span className="flex items-center gap-1 text-xs text-slate-400">
                 <Lock size={11} /> 재고 수량 수정·저장은 관리자 모드에서만 가능합니다
               </span>
             )}
             <button onClick={() => exportStockToExcel(stock, targets)}
-              className="flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100">
+              className="flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-sm font-medium text-emerald-700 hover:bg-emerald-100">
               <FileSpreadsheet size={14} /> 엑셀 다운로드
             </button>
           </div>
@@ -1969,15 +1969,15 @@ function StationBackupCard({ station, results, repH, missingCount, large }) {
       <div className="mb-2 flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className={`truncate font-semibold text-slate-800 ${large ? "text-lg" : "text-sm"}`}>{station["국소명"] || "-"}</p>
-          <p className={`truncate text-slate-400 ${large ? "text-sm" : "text-[11px]"}`}>{station["주소"] || "-"} · {station["팀"] || "-"}</p>
+          <p className={`truncate text-slate-400 ${large ? "text-sm" : "text-xs"}`}>{station["주소"] || "-"} · {station["팀"] || "-"}</p>
         </div>
-        <span className={`inline-block shrink-0 rounded-full font-medium ${tone.badge} ${large ? "px-3 py-1 text-xs" : "px-2 py-0.5 text-[10px]"}`}>{tier.label}</span>
+        <span className={`inline-block shrink-0 rounded-full font-medium ${tone.badge} ${large ? "px-3 py-1 text-sm" : "px-2 py-0.5 text-[11px]"}`}>{tier.label}</span>
       </div>
 
       <div className={`mb-3 flex items-end gap-1.5 rounded-lg bg-white/70 ${large ? "px-4 py-4" : "px-3 py-2"}`}>
         <Clock size={large ? 24 : 16} className={tone.big} />
         <p className={`font-extrabold leading-none ${tone.big} ${large ? "text-4xl" : "text-2xl"}`}>{repH != null ? repH : "-"}</p>
-        <p className={`pb-0.5 font-medium text-slate-400 ${large ? "text-sm" : "text-xs"}`}>{repH != null ? "시간 예상 (뱅크 중 최소값 기준)" : "계산 불가"}</p>
+        <p className={`pb-0.5 font-medium text-slate-400 ${large ? "text-sm" : "text-sm"}`}>{repH != null ? "시간 예상 (뱅크 중 최소값 기준)" : "계산 불가"}</p>
       </div>
 
 
@@ -1985,7 +1985,7 @@ function StationBackupCard({ station, results, repH, missingCount, large }) {
         <div className="space-y-2">
           {groups.map(([voltageKey, banks], gi) => (
             <div key={gi}>
-              <p className="mb-1 text-[10px] font-semibold text-slate-400">{voltageKey} 계열 · 축전지 뱅크 {banks.length}개</p>
+              <p className="mb-1 text-[11px] font-semibold text-slate-400">{voltageKey} 계열 · 축전지 뱅크 {banks.length}개</p>
               <div className="space-y-1">
                 {banks.map((res, j) => {
                   const rt = backupTier(res.backupH);
@@ -1996,7 +1996,7 @@ function StationBackupCard({ station, results, repH, missingCount, large }) {
                     <div key={j} className="overflow-hidden rounded-lg bg-white/70">
                       <button type="button" onClick={() => setOpenKey(isOpen ? null : key)}
                         className="flex w-full items-center justify-between gap-2 px-2 py-1.5 text-left">
-                        <span className={`inline-flex flex-wrap items-center gap-1 rounded-full px-2 py-1 text-[10px] font-medium ${rtone.chip}`}>
+                        <span className={`inline-flex flex-wrap items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ${rtone.chip}`}>
                           <span className="font-semibold">{res.전압 || "-"}</span>
                           <span className="text-slate-400">·</span>
                           <span>{res.규격합 || "-"}Ah{res.조수 > 1 ? `(${res.조수}조)` : ""}</span>
@@ -2008,7 +2008,7 @@ function StationBackupCard({ station, results, repH, missingCount, large }) {
                         <ChevronDown size={12} className={`shrink-0 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
                       </button>
                       {isOpen && (
-                        <div className="border-t border-slate-100 px-2 py-1.5 text-[10px] leading-relaxed text-slate-500">
+                        <div className="border-t border-slate-100 px-2 py-1.5 text-[11px] leading-relaxed text-slate-500">
                           <p>정류기 {res.번호 || "-"} · 축전지번호 {res.축전지번호목록.join(", ") || "-"}</p>
                           <p className="mt-1 break-all font-mono text-slate-600">
                             {res.backupH}h = ({res.규격합}Ah × {res.backupH}h) ÷ ({res.부하전류}A × C<sub>{res.전압}</sub>({res.backupH}h)≈{res.usedC})
@@ -2025,7 +2025,7 @@ function StationBackupCard({ station, results, repH, missingCount, large }) {
         </div>
       )}
       {missingCount > 0 && (
-        <p className="mt-1.5 text-[10px] text-slate-400">규격·부하전류 정보 누락으로 계산 제외된 축전지 뱅크 {missingCount}개</p>
+        <p className="mt-1.5 text-[11px] text-slate-400">규격·부하전류 정보 누락으로 계산 제외된 축전지 뱅크 {missingCount}개</p>
       )}
     </div>
   );
@@ -2052,7 +2052,7 @@ function BackupPage({ rows }) {
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="mb-3">
         <h3 className="text-sm font-semibold text-slate-700">Backup 시간 확인</h3>
-        <p className="mt-0.5 text-[11px] text-slate-400">
+        <p className="mt-0.5 text-xs text-slate-400">
           축전지 규격(Ah) · 부하전류(A) · 전압(2V/12V) 기반 자동 산출 · 용량산출계수C 반복계산
         </p>
       </div>
@@ -2072,7 +2072,7 @@ function BackupPage({ rows }) {
       )}
 
       {query.length >= 2 && computed.length === 0 && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-600">'{query}'와(과) 일치하는 국소가 없습니다.</p>
+        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-600">'{query}'와(과) 일치하는 국소가 없습니다.</p>
       )}
 
       {query.length >= 2 && computed.length > 0 && (
@@ -2083,7 +2083,7 @@ function BackupPage({ rows }) {
             ))}
           </div>
           {computed.length > SHOWN_LIMIT && (
-            <p className="mt-3 text-center text-[11px] text-slate-400">
+            <p className="mt-3 text-center text-xs text-slate-400">
               {computed.length}건 중 {SHOWN_LIMIT}건 표시 중 · 검색어를 더 구체적으로 입력해보세요.
             </p>
           )}
@@ -2100,14 +2100,14 @@ function AdminUploadSlot({ title, desc, count, uploadedAt, loading, onUpload, on
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-slate-700">{title}</p>
-          <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{desc}</p>
-          <p className="mt-2 text-[11px] text-slate-500">
+          <p className="mt-1 text-xs leading-relaxed text-slate-400">{desc}</p>
+          <p className="mt-2 text-xs text-slate-500">
             {count > 0 ? <>현재 <b className="text-blue-600">{count}건</b> 연동됨 · 최종 업로드 {uploadedAt || "-"}</> : "업로드된 엑셀 없음"}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <label title="여러 파일을 한 번에 선택할 수 있습니다. 통합시설코드가 같으면 하나로 합쳐집니다(같은 통합시설코드 값이 있는지 정확히 대조)."
-            className="flex cursor-pointer items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700">
+            className="flex cursor-pointer items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
             <Upload size={14} /> {loading ? "업로드 중..." : "엑셀 업로드"}
             <input type="file" accept=".xlsx,.xls,.csv" multiple onChange={onUpload} className="hidden" />
           </label>
@@ -2171,12 +2171,12 @@ function AdminMultiUploadSlot({ title, desc, files, loading, onUpload, onRemove,
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-slate-700">{title}</p>
-          <p className="mt-1 text-[11px] leading-relaxed text-slate-400">{desc}</p>
-          <p className="mt-2 text-[11px] text-slate-500">
+          <p className="mt-1 text-xs leading-relaxed text-slate-400">{desc}</p>
+          <p className="mt-2 text-xs text-slate-500">
             {files.length > 0 ? <>파일 <b className="text-blue-600">{files.length}개</b> · 합산 {totalLabel} <b className="text-blue-600">{totalCount}개</b> 연동됨</> : "업로드된 엑셀 없음"}
           </p>
         </div>
-        <label className="flex shrink-0 cursor-pointer items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700">
+        <label className="flex shrink-0 cursor-pointer items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
           <Upload size={14} /> {loading ? "업로드 중..." : "엑셀 업로드 추가"}
           <input type="file" accept=".xlsx,.xls,.csv" multiple onChange={onUpload} className="hidden" />
         </label>
@@ -2185,7 +2185,7 @@ function AdminMultiUploadSlot({ title, desc, files, loading, onUpload, onRemove,
       {files.length > 0 && (
         <div className="mt-3 space-y-2">
           {files.map((f) => (
-            <div key={f.id} className="rounded-lg bg-slate-50 px-3 py-2 text-[11px]">
+            <div key={f.id} className="rounded-lg bg-slate-50 px-3 py-2 text-xs">
               <div className="flex items-center justify-between gap-3">
                 <span className="min-w-0 flex-1 truncate text-slate-600">
                   <FileSpreadsheet size={12} className="mr-1 inline text-slate-400" />
@@ -2216,19 +2216,19 @@ function AdminMultiUploadSlot({ title, desc, files, loading, onUpload, onRemove,
 
 const BASE_COLUMN_GUIDE = (
   <>
-    <p className="mb-1.5 text-[11px] font-semibold text-slate-500">열 매핑 기준 (양식 고정 · 1행은 목차라 자동으로 건너뜀)</p>
-    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-slate-500 sm:grid-cols-4">
+    <p className="mb-1.5 text-xs font-semibold text-slate-500">열 매핑 기준 (양식 고정 · 1행은 목차라 자동으로 건너뜀)</p>
+    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-500 sm:grid-cols-4">
       <span>F열 → 통합시설코드</span><span>G열 → 국소명</span><span>I열 → 본부</span><span>J열 → SKT팀</span>
       <span>M열 → 팀(현장운용팀)</span><span>N열 → 주소</span><span>S열 → 국사형태</span>
       <span>CC열 → 5G</span><span>CD열 → 4G</span><span>CE열 → 3G (계는 자동 합산)</span>
       <span>CH열 → 5G ARRU(식)</span><span>CI열 → RU(식)</span><span>CJ열 → 5G L9TU(식)</span>
-      <span>CK열 → 링MUX RT 수용 RU/L9TU</span><span>CM열 → 중계기</span>
+      <span>CK열 → RU/L9TU</span><span>CM열 → 중계기</span>
       <span>X열 → 정류기번호</span><span>Z열 → 정류기모델</span><span>CB열 → 서비스(DU/W)</span><span>AK열 → 부하전류</span><span>BC열 → 규격(Ah)</span>
       <span>AX열 → 축전지번호</span><span>BD열 → 전압구분(2V/12V)</span><span>BN열 → 축전지상태</span><span>BO열 → 양호</span>
       <span>BP열 → 열화</span><span>BQ열 → 열화2</span><span>BR열 → 불량</span><span>BT열 → 내부저항측정일시</span>
       <span>BW열 → 대개체여부</span><span>BV열 → 불량여부(대시보드 집계용)</span>
     </div>
-    <p className="mt-2 text-[11px] text-amber-600">
+    <p className="mt-2 text-xs text-amber-600">
       전제조건: BV열(불량여부) 값이 "대상X" 또는 "폐국"인 행은 대시보드·팀별현황·기지국현황 등 모든 집계에서 제외됩니다.
     </p>
   </>
@@ -2283,7 +2283,7 @@ function AdminPage({
     <div className="space-y-4">
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <p className="text-sm font-semibold text-slate-700">관리자 · 엑셀 업로드</p>
-        <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+        <p className="mt-1 text-xs leading-relaxed text-slate-400">
           엑셀 파일이 여러 개라면, 대상(용도)에 맞는 칸에 각각 업로드하세요. 기지국·축전지 기본정보는 파일을 여러 개 추가할 수 있고, 추가한 파일들은 <b className="text-slate-500">통합시설코드</b>가
           정확히 일치하는 국소끼리만 하나로 합쳐져 함께 표시됩니다.
         </p>
@@ -2293,13 +2293,13 @@ function AdminPage({
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center">
           <Lock size={20} className="mx-auto mb-2 text-slate-300" />
           <p className="text-sm font-medium text-slate-500">엑셀 업로드·삭제·초기화는 관리자만 할 수 있어요.</p>
-          <p className="mt-1 text-[11px] text-slate-400">우측 상단 "일반 모드" 버튼을 눌러 PIN을 입력하면 관리자 모드로 전환됩니다.</p>
+          <p className="mt-1 text-xs text-slate-400">우측 상단 "일반 모드" 버튼을 눌러 PIN을 입력하면 관리자 모드로 전환됩니다.</p>
         </div>
       ) : (
         <>
           {baseFiles.length > 0 && (
             <div className="flex justify-end">
-              <button onClick={onBaseReset} className="flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-500 hover:bg-slate-50">
+              <button onClick={onBaseReset} className="flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm text-slate-500 hover:bg-slate-50">
                 <RotateCcw size={13} /> 전체 초기화
               </button>
             </div>
@@ -2354,7 +2354,7 @@ function AdminPage({
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <p className="text-sm font-semibold text-slate-700">축전지 재고 대상 정보</p>
-        <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+        <p className="mt-1 text-xs leading-relaxed text-slate-400">
           더 이상 엑셀 업로드가 아니라, 축전지 재고 현황 화면에서 관리자가 대상을 직접 추가·입력합니다. 관리자 모드로 전환한 뒤 "축전지 재고 현황" 메뉴에서 편집해주세요.
         </p>
       </div>
@@ -2364,11 +2364,11 @@ function AdminPage({
           <History size={16} className="text-blue-500" />
           <p className="text-sm font-semibold text-slate-700">ACTA 내부저항측정 변동 이력</p>
         </div>
-        <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+        <p className="mt-1 text-xs leading-relaxed text-slate-400">
           기본정보가 바뀔 때마다 정류기별 등급(양호/열화/열화2/불량)을 이전 기록과 비교합니다. 값이 달라진 시점만 자동으로 쌓이며,
           홈 화면 &gt; 국소 상세 현황 &gt; ACTA 내부저항측정 이력에서 정류기번호를 클릭하면 확인할 수 있습니다.
         </p>
-        <p className="mt-2 text-[11px] text-slate-500">현재 <b className="text-blue-600">{actaHistoryCount}개</b> 정류기의 변동 이력이 기록되어 있습니다.</p>
+        <p className="mt-2 text-xs text-slate-500">현재 <b className="text-blue-600">{actaHistoryCount}개</b> 정류기의 변동 이력이 기록되어 있습니다.</p>
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
@@ -2376,11 +2376,11 @@ function AdminPage({
           <X size={16} className="text-blue-500" />
           <p className="text-sm font-semibold text-slate-700">집계에서 제외할 정류기 모델명</p>
         </div>
-        <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+        <p className="mt-1 text-xs leading-relaxed text-slate-400">
           여기에 추가한 모델명(Z열)을 가진 정류기는 대시보드·팀별현황·기지국현황 등 모든 집계와 상태 판정에서 빠집니다(표시는 그대로 됩니다).
         </p>
         {!isAdmin && (
-          <p className="mt-2 flex items-center gap-1 text-[11px] text-slate-400">
+          <p className="mt-2 flex items-center gap-1 text-xs text-slate-400">
             <Lock size={11} /> 추가·삭제는 관리자만 가능합니다. 목록은 아래에서 확인만 가능해요.
           </p>
         )}
@@ -2392,28 +2392,28 @@ function AdminPage({
               onChange={(e) => setModelInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && modelInput.trim()) { onAddExcludedModel(modelInput); setModelInput(""); } }}
               placeholder="정류기 모델명 입력 후 Enter"
-              className="min-w-[180px] flex-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-blue-400"
+              className="min-w-[180px] flex-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm outline-none focus:border-blue-400"
             />
             <datalist id="admin-model-suggestions">
               {availableModels.map((m) => <option key={m} value={m} />)}
             </datalist>
             <button
               onClick={() => { if (modelInput.trim()) { onAddExcludedModel(modelInput); setModelInput(""); } }}
-              className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+              className="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
             >
               <Plus size={13} /> 추가
             </button>
           </div>
         )}
         {isAdmin && availableModels.length > 0 && (
-          <p className="mt-2 text-[11px] text-slate-400">
+          <p className="mt-2 text-xs text-slate-400">
             현재 데이터에 있는 모델명: {availableModels.slice(0, 12).join(", ")}{availableModels.length > 12 ? " 외" : ""}
           </p>
         )}
         {(excludedModels || []).length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {excludedModels.map((m) => (
-              <span key={m} className="flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-600">
+              <span key={m} className="flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-sm font-medium text-red-600">
                 {m}
                 {isAdmin && (
                   <button onClick={() => onRemoveExcludedModel(m)} className="rounded-full p-0.5 hover:bg-red-100">
@@ -2424,7 +2424,7 @@ function AdminPage({
             ))}
           </div>
         ) : (
-          <p className="mt-3 text-[11px] text-slate-400">제외 중인 모델명이 없습니다.</p>
+          <p className="mt-3 text-xs text-slate-400">제외 중인 모델명이 없습니다.</p>
         )}
       </div>
 
@@ -2433,15 +2433,15 @@ function AdminPage({
           <BarChart3 size={16} className="text-blue-500" />
           <p className="text-sm font-semibold text-slate-700">집계 근거 확인 (관리자 전용)</p>
         </div>
-        <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+        <p className="mt-1 text-xs leading-relaxed text-slate-400">
           홈 대시보드 숫자가 왜 그렇게 나오는지 확인용입니다. 전압(BD열)별 원본 행 수 · 제외된 건수(대상X·폐국·제외모델) · 서비스(CB열)별 분포를 그대로 보여줍니다.
         </p>
         {!isAdmin ? (
-          <p className="mt-3 flex items-center gap-1 text-xs text-slate-400">
+          <p className="mt-3 flex items-center gap-1 text-sm text-slate-400">
             <Lock size={12} /> 관리자 모드로 로그인해야 볼 수 있습니다.
           </p>
         ) : (
-          <div className="mt-3 overflow-x-auto rounded-lg border border-slate-200 bg-slate-50/60 p-3 text-[11px]">
+          <div className="mt-3 overflow-x-auto rounded-lg border border-slate-200 bg-slate-50/60 p-3 text-xs">
             <table className="w-full min-w-[520px] text-left">
               <thead className="text-slate-400">
                 <tr>
@@ -2485,19 +2485,19 @@ function AdminPage({
           <Lock size={16} className="text-blue-500" />
           <p className="text-sm font-semibold text-slate-700">관리자 PIN 변경</p>
         </div>
-        <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+        <p className="mt-1 text-xs leading-relaxed text-slate-400">
           관리자 모드로 로그인해야 축전지 재고의 대상 추가·수정·저장, 작업예정일 입력이 가능합니다. 여기서 관리자 PIN을 바꿀 수 있어요(기본값 0000).
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <input type="password" value={pin1} onChange={(e) => setPin1(e.target.value.replace(/\D/g, ""))} placeholder="새 PIN"
-            className="w-28 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-blue-400" />
+            className="w-28 rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm outline-none focus:border-blue-400" />
           <input type="password" value={pin2} onChange={(e) => setPin2(e.target.value.replace(/\D/g, ""))} placeholder="새 PIN 확인"
-            className="w-28 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-blue-400" />
-          <button onClick={submitPin} className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700">
+            className="w-28 rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm outline-none focus:border-blue-400" />
+          <button onClick={submitPin} className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
             변경
           </button>
         </div>
-        {pinMsg && <p className="mt-2 text-[11px] text-slate-500">{pinMsg}</p>}
+        {pinMsg && <p className="mt-2 text-xs text-slate-500">{pinMsg}</p>}
       </div>
     </div>
   );
@@ -2696,13 +2696,13 @@ export default function App() {
             <span className="text-sm font-bold text-slate-800 sm:text-base">기지국 · 축전지 통합 관리 시스템</span>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <span className="hidden text-xs text-slate-400 lg:block">
+            <span className="hidden text-sm text-slate-400 lg:block">
               {baseFiles.length ? `국소 ${rows.length}건 · 파일 ${baseFiles.length}개` : "샘플 데이터 표시 중"}
             </span>
             {isAdmin && (
               <button onClick={() => setPage("admin")}
                 title="관리자 메뉴에서 엑셀을 업로드하세요"
-                className={`flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium hover:bg-slate-50 ${
+                className={`flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-sm font-medium hover:bg-slate-50 ${
                   page === "admin" ? "border-blue-300 text-blue-600 bg-blue-50" : "border-slate-200 text-slate-500"
                 }`}>
                 <Settings size={14} /> 관리자
@@ -2710,7 +2710,7 @@ export default function App() {
             )}
             <button onClick={toggleAdmin}
               title={isAdmin ? "클릭하면 관리자 모드가 종료됩니다" : "PIN을 입력하면 관리자 모드로 전환됩니다"}
-              className={`flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium ${
+              className={`flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-sm font-medium ${
                 isAdmin ? "border-emerald-300 bg-emerald-50 text-emerald-600" : "border-slate-200 text-slate-500 hover:bg-slate-50"
               }`}>
               {isAdmin ? <Unlock size={14} /> : <Lock size={14} />} {isAdmin ? "관리자 모드" : "일반 모드"}
@@ -2749,7 +2749,7 @@ export default function App() {
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-600"><Lock size={16} /></div>
               <div>
                 <p className="text-sm font-semibold text-slate-700">관리자 모드</p>
-                <p className="text-[11px] text-slate-400">PIN을 입력하세요</p>
+                <p className="text-xs text-slate-400">PIN을 입력하세요</p>
               </div>
             </div>
             <input
@@ -2761,14 +2761,14 @@ export default function App() {
               placeholder="PIN 입력 (기본 0000)"
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-center text-sm tracking-widest outline-none focus:border-blue-400"
             />
-            {pinError && <p className="mt-2 text-center text-[11px] text-red-500">{pinError}</p>}
+            {pinError && <p className="mt-2 text-center text-xs text-red-500">{pinError}</p>}
             <div className="mt-4 flex gap-2">
               <button onClick={() => setPinModalOpen(false)}
-                className="flex-1 rounded-lg border border-slate-200 py-2 text-xs font-medium text-slate-500 hover:bg-slate-50">
+                className="flex-1 rounded-lg border border-slate-200 py-2 text-sm font-medium text-slate-500 hover:bg-slate-50">
                 취소
               </button>
               <button onClick={submitPinModal}
-                className="flex-1 rounded-lg bg-blue-600 py-2 text-xs font-medium text-white hover:bg-blue-700">
+                className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700">
                 확인
               </button>
             </div>
@@ -2778,7 +2778,7 @@ export default function App() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed left-1/2 top-16 z-30 max-w-[92vw] -translate-x-1/2 rounded-lg bg-slate-800 px-4 py-2 text-center text-xs text-white shadow-lg sm:max-w-md">
+        <div className="fixed left-1/2 top-16 z-30 max-w-[92vw] -translate-x-1/2 rounded-lg bg-slate-800 px-4 py-2 text-center text-sm text-white shadow-lg sm:max-w-md">
           {toast}
         </div>
       )}
